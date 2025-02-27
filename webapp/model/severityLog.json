@@ -1,0 +1,7 @@
+{
+    "data": [
+        { "severity": "Low", "total": 10 },
+        { "severity": "Medium", "total": 20 },
+        { "severity": "High", "total": 5 }
+    ]
+} 

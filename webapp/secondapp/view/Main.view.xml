@@ -1,0 +1,9 @@
+<mvc:View controllerName="secondapp.controller.Main"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m">
+    <Page title="Second App">
+        <content>
+            <Text text="Welcome to the Second App!" />
+        </content>
+    </Page>
+</mvc:View> 

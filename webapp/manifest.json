@@ -1,0 +1,108 @@
+{
+    "_version": "1.65.0",
+    "sap.app": {
+        "id": "overviewdashboard.projectdashboard",
+        "type": "application",
+        "i18n": "i18n/i18n.properties",
+        "applicationVersion": {
+            "version": "0.0.1"
+        },
+        "title": "{{appTitle}}",
+        "description": "{{appDescription}}",
+        "resources": "resources.json",
+        "sourceTemplate": {
+            "id": "@sap/generator-fiori:basic",
+            "version": "1.16.3",
+            "toolsId": "7f121dc1-3ac5-4202-adfa-383557f06f28"
+        }
+    },
+    "sap.ui": {
+        "technology": "UI5",
+        "icons": {
+            "icon": "",
+            "favIcon": "",
+            "phone": "",
+            "phone@2": "",
+            "tablet": "",
+            "tablet@2": ""
+        },
+        "deviceTypes": {
+            "desktop": true,
+            "tablet": true,
+            "phone": true
+        }
+    },
+    "sap.ui5": {
+        "flexEnabled": true,
+        "dependencies": {
+            "minUI5Version": "1.129.0",
+            "libs": {
+                "sap.m": {},
+                "sap.ui.core": {}
+            }
+        },
+        "contentDensities": {
+            "compact": true,
+            "cozy": true
+        },
+        "models": {
+            "i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "settings": {
+                    "bundleName": "overviewdashboard.projectdashboard.i18n.i18n"
+                }
+            }
+        },
+        "resources": {
+            "css": [
+                {
+                    "uri": "css/style.css"
+                }
+            ]
+        },
+        "routing": {
+            "config": {
+                "routerClass": "sap.m.routing.Router",
+                "controlAggregation": "pages",
+                "controlId": "app",
+                "transition": "slide",
+                "type": "View",
+                "viewType": "XML",
+                "path": "overviewdashboard.projectdashboard.view",
+                "async": true,
+                "viewPath": "overviewdashboard.projectdashboard.view"
+            },
+            "routes": [
+                {
+                    "name": "RouteOverviewDashboard",
+                    "pattern": ":?query:",
+                    "target": [
+                        "TargetOverviewDashboard"
+                    ]
+                },
+                {
+                    "name": "RouteSecondApp",
+                    "pattern": "secondapp",
+                    "target": [
+                        "TargetSecondApp"
+                    ]
+                }
+            ],
+            "targets": {
+                "TargetOverviewDashboard": {
+                    "id": "OverviewDashboard",
+                    "name": "OverviewDashboard"
+                },
+                "TargetSecondApp": {
+                    "id": "SecondApp",
+                    "name": "SecondApp"
+                }
+            }
+        },
+        "rootView": {
+            "viewName": "overviewdashboard.projectdashboard.view.App",
+            "type": "XML",
+            "id": "App"
+        }
+    }
+}

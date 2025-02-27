@@ -1,0 +1,8 @@
+{
+    "logData": [
+        { "logType": "Error", "count": 10 },
+        { "logType": "Warning", "count": 5 },
+        { "logType": "Info", "count": 15 },
+        { "logType": "Debug", "count": 8 }
+    ]
+} 

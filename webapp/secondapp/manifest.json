@@ -1,0 +1,58 @@
+{
+    "_version": "1.65.0",
+    "sap.app": {
+        "id": "secondapp",
+        "type": "application",
+        "i18n": "i18n/i18n.properties",
+        "applicationVersion": {
+            "version": "0.0.1"
+        },
+        "title": "Second App",
+        "description": "This is the second app"
+    },
+    "sap.ui": {
+        "technology": "UI5",
+        "deviceTypes": {
+            "desktop": true,
+            "tablet": true,
+            "phone": true
+        }
+    },
+    "sap.ui5": {
+        "dependencies": {
+            "minUI5Version": "1.129.0",
+            "libs": {
+                "sap.m": {},
+                "sap.ui.core": {}
+            }
+        },
+        "routing": {
+            "config": {
+                "routerClass": "sap.m.routing.Router",
+                "controlAggregation": "pages",
+                "controlId": "app",
+                "transition": "slide",
+                "viewType": "XML",
+                "async": true
+            },
+            "routes": [
+                {
+                    "name": "Main",
+                    "pattern": "",
+                    "target": "Main"
+                }
+            ],
+            "targets": {
+                "Main": {
+                    "viewName": "Main",
+                    "viewLevel": 1
+                }
+            }
+        },
+        "rootView": {
+            "viewName": "secondapp.view.Main",
+            "type": "XML",
+            "id": "App"
+        }
+    }
+} 
