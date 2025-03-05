@@ -8,10 +8,24 @@
             "version": "0.0.1"
         },
         "title": "Second App",
-        "description": "This is the second app"
+        "description": "This is the second app",
+        "resources": "resources.json",
+        "sourceTemplate": {
+            "id": "@sap/generator-fiori:basic",
+            "version": "1.16.3",
+            "toolsId": "7f121dc1-3ac5-4202-adfa-383557f06f28"
+        }
     },
     "sap.ui": {
         "technology": "UI5",
+        "icons": {
+            "icon": "",
+            "favIcon": "",
+            "phone": "",
+            "phone@2": "",
+            "tablet": "",
+            "tablet@2": ""
+        },
         "deviceTypes": {
             "desktop": true,
             "tablet": true,
@@ -19,6 +33,7 @@
         }
     },
     "sap.ui5": {
+        "flexEnabled": true,
         "dependencies": {
             "minUI5Version": "1.129.0",
             "libs": {
