@@ -1,7 +1,12 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
-    "sap/ui/model/json/JSONModel"
-], function (Controller, JSONModel) {
+    "sap/ui/model/json/JSONModel",
+    "sap/viz/ui5/data/FlattenedDataset",
+    "sap/viz/ui5/format/ChartFormatter",
+    "sap/viz/ui5/api/env/Format",
+    "sap/ui/model/BindingMode"
+
+], function (Controller, JSONModel, BindingMode, FlattenedDataset, ChartFormatter, Format) {
     "use strict";
 
     return Controller.extend("overviewdashboard.projectdashboard.controller.OverviewDashboard", {
@@ -25,6 +30,12 @@ sap.ui.define([
             var oEventTimeModel = new JSONModel();
             oEventTimeModel.loadData("../model/eventTimeData.json");
             this.getView().setModel(oEventTimeModel, "eventTimeModel");
+
+            // Tạo mô hình JSON cho thời gian hiện tại
+            var oTimeModel = new JSONModel({
+                currentTime: this.getCurrentTime()
+            });
+            this.getView().setModel(oTimeModel, "timeModel");
 
             // Set title for the column chart
             var oVizFrameColumn = this.byId("idVizFrameColumn");
@@ -82,7 +93,17 @@ sap.ui.define([
                 }
             });
         },
-
-
+        // Nav to Event Detail Page
+        onViewDetail: function () {
+            var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
+            oRouter.navTo("EveDetail");
+        },
+        getCurrentTime: function() {
+            var now = new Date();
+            var hours = String(now.getHours()).padStart(2, '0');
+            var minutes = String(now.getMinutes()).padStart(2, '0');
+            var seconds = String(now.getSeconds()).padStart(2, '0');
+            return hours + ':' + minutes + ':' + seconds;
+        }
     });
 }); 

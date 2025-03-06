@@ -1,1 +1,8 @@
 /* Enter your custom styles here */
+.fullScreenMargin {
+    margin: 10px; /* Điều chỉnh giá trị này theo nhu cầu của bạn */
+}
+
+.largeText {
+    font-size: 1.2rem; /* Tăng kích thước chữ */
+}

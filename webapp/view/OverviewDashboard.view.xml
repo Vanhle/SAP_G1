@@ -6,10 +6,11 @@
     xmlns:viz.data="sap.viz.ui5.data"
     xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds"
     xmlns:layout="sap.ui.layout"
+    xmlns:card="sap.f.cards"
+    xmlns:f="sap.f"
 >
     <Page
         id="page"
-        
         class="sapUiContentPadding"
     >
         <content>
@@ -215,7 +216,7 @@
                         <layoutData>
                             <layout:GridData
                                 id="_IDGenGridData23"
-                                span="L8 M8 S12"
+                                span="L8 M12 S12"
                             />
                         </layoutData>
                         <VBox id="_IDGenVBox2">
@@ -267,6 +268,63 @@
                                     />
                                 </viz:feeds>
                             </viz:VizFrame>
+                        </VBox>
+                    </Panel>
+                    <Panel
+                        id="_IDGenPanel3"
+                        width="100%"
+                        height="100%"
+                    >
+                        <layoutData>
+                            <layout:GridData
+                                id="_IDGenGridData3"
+                                span="L4 M12 S12"
+                            />
+                        </layoutData>
+                        <VBox
+                            id="_IDGenVBox3"
+                            class="sapUiSmallMargin"
+                            justifyContent="Center"
+                            alignItems="Start"
+                        >
+                            <HBox
+                                id="_IDGenHBox1"
+                                justifyContent="Start"
+                                alignItems="Center"
+                            >
+                                <Text
+                                    id="_IDGenText1Title"
+                                    text="Last update at:"
+                                    class="sapUiSmallMarginEnd largeText"
+                                    wrapping="false"
+                                    width="150px"
+                                />
+                                <Text
+                                    id="_IDGenText1Content"
+                                    text="{timeModel>/currentTime}"
+                                    class="sapUiSmallMarginEnd"
+                                    wrapping="false"
+                                />
+                            </HBox>
+                            <HBox
+                                id="_IDGenHBox2"
+                                justifyContent="Start"
+                                alignItems="Center"
+                            >
+                                <Text
+                                    id="_IDGenText2Title"
+                                    text="Alert today:"
+                                    class="sapUiSmallMarginEnd largeText"
+                                    wrapping="false"
+                                    width="150px"
+                                />
+                                <Text
+                                    id="_IDGenText2Content"
+                                    text="3"
+                                    class="sapUiSmallMarginEnd"
+                                    wrapping="false"
+                                />
+                            </HBox>
                         </VBox>
                     </Panel>
                 </layout:content>

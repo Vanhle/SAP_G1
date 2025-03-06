@@ -86,6 +86,11 @@
                     "target": [
                         "TargetSecondApp"
                     ]
+                },
+                {
+                    "pattern": "EveDetail",
+                    "name": "EveDetail",
+                    "target": "EveDetail"
                 }
             ],
             "targets": {
@@ -96,6 +101,10 @@
                 "TargetSecondApp": {
                     "id": "SecondApp",
                     "name": "SecondApp"
+                },
+                "EveDetail": {
+                    "id": "EveDetail",
+                    "name": "EveDetail"
                 }
             }
         },

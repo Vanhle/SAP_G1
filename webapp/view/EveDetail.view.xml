@@ -1,0 +1,21 @@
+<mvc:View
+    controllerName="overviewdashboard.projectdashboard.controller.EveDetail"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:html="http://www.w3.org/1999/xhtml"
+>
+    <Page id="_IDGenPage1" >
+        <Breadcrumbs
+            id="_IDGenBreadcrumbs1"
+            currentLocationText="Details event by day"
+            separatorStyle="{/selected}"
+            class="fullScreenMargin"
+        >
+            <Link
+                id="_IDGenLink"
+                press="onHomePress"
+                text="Home"
+            />                       
+        </Breadcrumbs>
+    </Page>
+</mvc:View>
