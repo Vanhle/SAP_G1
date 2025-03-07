@@ -1,20 +1,47 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
+    "sap/ui/model/odata/v2/ODataModel",
     "sap/ui/model/json/JSONModel",
     "sap/viz/ui5/data/FlattenedDataset",
     "sap/viz/ui5/format/ChartFormatter",
     "sap/viz/ui5/api/env/Format",
     "sap/ui/model/BindingMode"
 
-], function (Controller, JSONModel, BindingMode, FlattenedDataset, ChartFormatter, Format) {
+], function (Controller, ODataModel, JSONModel, BindingMode, FlattenedDataset, ChartFormatter, Format) {
     "use strict";
 
     return Controller.extend("overviewdashboard.projectdashboard.controller.OverviewDashboard", {
         onInit: function () {
-            // Tạo mô hình JSON và tải dữ liệu cho biểu đồ cột
-            var oModel = new JSONModel();
-            oModel.loadData("../model/data.json");
-            this.getView().setModel(oModel, "dataModel");
+            // Sử dụng ODataModel để kết nối với OData service
+            var oDataModel = new ODataModel("/sap/opu/odata/sap/ZL253_TEST_SM20_SEGW_SRV/");
+            this.getView().setModel(oDataModel, "dataModel");
+
+            // Lấy ngày hiện tại và ngày 15 ngày trước
+            var today = new Date();
+            var pastDate = new Date();
+            pastDate.setDate(today.getDate() - 15);
+
+            // Định dạng ngày theo chuẩn OData (YYYY-MM-DD)
+            var todayString = today.toISOString().split('T')[0];
+            console.log('Today is:' + todayString);
+            var pastDateString = pastDate.toISOString().split('T')[0];
+            console.log('Past date is:' + pastDateString);
+
+            // Sử dụng $filter để lấy dữ liệu trong 15 ngày gần nhất
+            oDataModel.read("/SalogSet", {
+                urlParameters: {
+                    // "$filter": "SalDate ge datetime'" + pastDateString + "' and SalDate le datetime'" + todayString + "'",
+                    "$top": 100
+                },
+                success: function (oData) {
+                    var accessCounts = this.processApiData(oData);
+                    var oProcessedModel = new JSONModel(accessCounts);
+                    this.getView().setModel(oProcessedModel, "processedDataModel");
+                }.bind(this),
+                error: function (oError) {
+                    console.error("Error fetching data from OData service", oError);
+                }
+            });
 
             // Tạo mô hình JSON và tải dữ liệu cho biểu đồ tròn
             var oLogModel = new JSONModel();
@@ -104,6 +131,38 @@ sap.ui.define([
             var minutes = String(now.getMinutes()).padStart(2, '0');
             var seconds = String(now.getSeconds()).padStart(2, '0');
             return hours + ':' + minutes + ':' + seconds;
+        },
+        getToday: function() {
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return today;
+        },
+        processApiData: function(data) {
+            if (!data || !data.results) {
+                console.error("Invalid data format", data);
+                return [];
+            }
+
+            var results = data.results;
+            var accessCounts = {};
+            var today = this.getToday();
+
+            results.forEach(function(entry) {
+                // Chuyển đổi SalDate từ Unix timestamp
+                var date = new Date(entry.SalDate);
+                date.setHours(date.getHours() + 6); // Adjust timezone by adding 6 hours
+                var dayDifference = Math.floor((today - date) / (1000 * 60 * 60 * 24));
+
+                if (dayDifference >= 0 && dayDifference < 15) {
+                    var dateString = date.toISOString().split('T')[0];
+                    if (!accessCounts[dateString]) {
+                        accessCounts[dateString] = { date: dateString, count: 0 };
+                    }
+                    accessCounts[dateString].count++;
+                }
+            });
+
+            return Object.values(accessCounts);
         }
     });
 }); 

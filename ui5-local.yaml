@@ -36,7 +36,12 @@ server:
     - name: fiori-tools-proxy
       afterMiddleware: compression
       configuration:
-        ignoreCertError: false # If set to true, certificate errors will be ignored. E.g. self-signed certificates will be accepted
+        ignoreCertError: true # If set to true, certificate errors will be ignored. E.g. self-signed certificates will be accepted
+        backend:
+        - path: /sap
+          url: https://s35.gb.ucc.cit.tum.de
+          client: "302"
+          auth: 'LEARN-253:kdhkdt249079'
 builder:
   customTasks:
     - name: ui5-tooling-transpile-task

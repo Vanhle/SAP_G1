@@ -44,37 +44,37 @@
                             >
                                 <viz:dataset>
                                     <viz.data:FlattenedDataset
-                                        id="_IDGenFlattenedDataset"
-                                        data="{dataModel>/data}"
+                                        id="processedDataFlattenedDataset"
+                                        data="{processedDataModel>/}"
                                     >
                                         <viz.data:dimensions>
                                             <viz.data:DimensionDefinition
-                                                id="_IDGenDimensionDefinition"
-                                                name="Day"
-                                                value="{day}"
+                                                id="processedDataDimensionDefinition"
+                                                name="Date"
+                                                value="{processedDataModel>date}"
                                             />
                                         </viz.data:dimensions>
                                         <viz.data:measures>
                                             <viz.data:MeasureDefinition
-                                                id="_IDGenMeasureDefinition"
-                                                name="Quantity"
-                                                value="{quantity}"
+                                                id="processedDataMeasureDefinition"
+                                                name="Access Count"
+                                                value="{processedDataModel>count}"
                                             />
                                         </viz.data:measures>
                                     </viz.data:FlattenedDataset>
                                 </viz:dataset>
                                 <viz:feeds>
                                     <viz.feeds:FeedItem
-                                        id="_IDGenFeedItem1"
+                                        id="processedDataFeedItem1"
                                         uid="valueAxis"
                                         type="Measure"
-                                        values="Quantity"
+                                        values="Access Count"
                                     />
                                     <viz.feeds:FeedItem
-                                        id="_IDGenFeedItem2"
+                                        id="processedDataFeedItem2"
                                         uid="categoryAxis"
                                         type="Dimension"
-                                        values="Day"
+                                        values="Date"
                                     />
                                 </viz:feeds>
                             </viz:VizFrame>

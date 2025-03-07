@@ -51,6 +51,15 @@
                 "settings": {
                     "bundleName": "overviewdashboard.projectdashboard.i18n.i18n"
                 }
+            },
+            "": {
+                "type": "sap.ui.model.odata.v2.ODataModel",
+                "settings": {
+                    "defaultBindingMode": "TwoWay",
+                    "useBatch": true,
+                    "defaultCountMode": "Request"
+                },
+                "uri": "/sap/opu/odata/sap/ZL253_TEST_SM20_SEGW_SRV/"
             }
         },
         "resources": {
