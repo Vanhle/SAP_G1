@@ -5,9 +5,9 @@ sap.ui.define([
     "sap/viz/ui5/data/FlattenedDataset",
     "sap/viz/ui5/format/ChartFormatter",
     "sap/viz/ui5/api/env/Format",
-    "sap/ui/model/BindingMode"
-
-], function (Controller, ODataModel, JSONModel, BindingMode, FlattenedDataset, ChartFormatter, Format) {
+    "sap/ui/model/BindingMode",
+    "sap/m/DateRangeSelection"
+], function (Controller, ODataModel, JSONModel, BindingMode, FlattenedDataset, ChartFormatter, Format, DateRangeSelection) {
     "use strict";
 
     return Controller.extend("overviewdashboard.projectdashboard.controller.OverviewDashboard", {
@@ -16,34 +16,95 @@ sap.ui.define([
             var oDataModel = new ODataModel("/sap/opu/odata/sap/ZL253_TEST_SM20_SEGW_SRV/");
             this.getView().setModel(oDataModel, "dataModel");
 
-            // Lấy ngày hiện tại và ngày 15 ngày trước
-            var today = new Date();
-            var pastDate = new Date();
-            pastDate.setDate(today.getDate() - 15);
+            // Gọi TriggerZG1SALV trước
+            oDataModel.callFunction("/TriggerZG1SALV", {
+                method: "POST",
+                success: function () {
+                    // Sau khi trigger thành công, gọi tiếp API lấy dữ liệu cho biểu đồ
+                    this.loadChartData(oDataModel);
+                }.bind(this),
+                error: function (oError) {
+                    console.error("Error triggering ZG1SALV", oError);
+                    // Nếu có lỗi vẫn tiếp tục load dữ liệu
+                    this.loadChartData(oDataModel);
+                }.bind(this)
+            });
 
-            // Định dạng ngày theo chuẩn OData (YYYY-MM-DD)
-            var todayString = today.toISOString().split('T')[0];
-            console.log('Today is:' + todayString);
-            var pastDateString = pastDate.toISOString().split('T')[0];
-            console.log('Past date is:' + pastDateString);
+            // Set default date range
+            var oDateRange = this.byId("dateRangeSelection");
+            var oEndDate = new Date();
+            var oStartDate = new Date();
+            oStartDate.setDate(oStartDate.getDate() - 7);
+            oDateRange.setDateValue(oStartDate);
+            oDateRange.setSecondDateValue(oEndDate);
+        },
+        // Tách phần load dữ liệu biểu đồ ra thành hàm riêng
+        getCurrentDateTime: function() {
+            var currentDate = new Date();
+            var year = currentDate.getFullYear();
+            var month = String(currentDate.getMonth() + 1).padStart(2, '0');
+            var day = String(currentDate.getDate()).padStart(2, '0');
+            // var hours = String(currentDate.getHours()).padStart(2, '0');
+            // var minutes = String(currentDate.getMinutes()).padStart(2, '0');
+            // var seconds = String(currentDate.getSeconds()).padStart(2, '0');
+            
+            return `${year}-${month}-${day}T17:00:00`;
+        },
 
-            // Sử dụng $filter để lấy dữ liệu trong 15 ngày gần nhất
-            oDataModel.read("/SalogSet", {
+        getStartDateTime: function() {
+            var startDate = new Date();
+            startDate.setDate(startDate.getDate() - 10); // Trừ đi 7 ngày
+            // startDate.setHours(0, 0, 0, 0); // Set giờ về 00:00:00
+            
+            // Tạo string datetime với offset +07:00
+            var year = startDate.getFullYear();
+            var month = String(startDate.getMonth() + 1).padStart(2, '0');
+            var day = String(startDate.getDate()).padStart(2, '0');
+            
+            return `${year}-${month}-${day}T00:00:00`;
+        },
+
+        getCurrentTime: function() {
+            var now = new Date();
+            var hours = String(now.getHours()).padStart(2, '0');
+            var minutes = String(now.getMinutes()).padStart(2, '0');
+            var seconds = String(now.getSeconds()).padStart(2, '0');
+            return hours + ':' + minutes + ':' + seconds;
+        },
+
+        loadChartData: function(oDataModel) {
+            var endDateTime = this.getCurrentDateTime();
+            console.log("endDateTime: " + endDateTime);
+            var startDateTime = this.getStartDateTime();
+            console.log("startDateTime: " + startDateTime);
+
+            oDataModel.read("/SalogCountSet", {
                 urlParameters: {
-                    // "$filter": "SalDate ge datetime'" + pastDateString + "' and SalDate le datetime'" + todayString + "'",
-                    "$top": 100
+                    "$filter": "StartDateTime eq datetime'" + startDateTime + "' and EndDateTime eq datetime'" + endDateTime + "' and Step eq '1d'",
+                    "$format": "json"
                 },
                 success: function (oData) {
-                    var accessCounts = this.processApiData(oData);
-                    var oProcessedModel = new JSONModel(accessCounts);
-                    this.getView().setModel(oProcessedModel, "processedDataModel");
+                    // Xử lý và format lại dữ liệu
+                    var formattedData = oData.results.map(function(item) {
+                        return {
+                            ...item,
+                            StartDateTime: new Date(item.StartDateTime).toISOString().split('T')[0],
+                            MediumCount: item.MediumCount,
+                            HighCount: item.HighCount
+                        };
+                    });
+                    
+                    var oModel = new JSONModel({
+                        results: formattedData
+                    });
+                    this.getView().setModel(oModel, "processedDataModel");
                 }.bind(this),
                 error: function (oError) {
                     console.error("Error fetching data from OData service", oError);
                 }
             });
 
-            // Tạo mô hình JSON và tải dữ liệu cho biểu đồ tròn
+            // Load các model khác
             var oLogModel = new JSONModel();
             oLogModel.loadData("../model/logData.json");
             this.getView().setModel(oLogModel, "logDataModel");
@@ -125,44 +186,70 @@ sap.ui.define([
             var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
             oRouter.navTo("EveDetail");
         },
-        getCurrentTime: function() {
-            var now = new Date();
-            var hours = String(now.getHours()).padStart(2, '0');
-            var minutes = String(now.getMinutes()).padStart(2, '0');
-            var seconds = String(now.getSeconds()).padStart(2, '0');
-            return hours + ':' + minutes + ':' + seconds;
-        },
-        getToday: function() {
-            var today = new Date();
-            today.setHours(0, 0, 0, 0);
-            return today;
-        },
-        processApiData: function(data) {
-            if (!data || !data.results) {
-                console.error("Invalid data format", data);
-                return [];
+
+        onDateRangeChange: function(oEvent) {
+            var oDateRange = oEvent.getSource();
+            var oStartDate = oDateRange.getDateValue();
+            var oEndDate = oDateRange.getSecondDateValue();
+            
+            if (oStartDate && oEndDate) {
+                var startDateTime = this.formatDateToDateTime(oStartDate, true);
+                var endDateTime = this.formatDateToDateTime(oEndDate, false);
+                this.loadChartDataWithDateRange(startDateTime, endDateTime);
             }
+        },
 
-            var results = data.results;
-            var accessCounts = {};
-            var today = this.getToday();
+        formatDateToDateTime: function(date, isStartDate) {
+            var year = date.getFullYear();
+            var month = String(date.getMonth() + 1).padStart(2, '0');
+            var day = String(date.getDate()).padStart(2, '0');
+            var time = isStartDate ? "00:00:00" : "17:00:00";
+            
+            return `${year}-${month}-${day}T${time}`;
+        },
 
-            results.forEach(function(entry) {
-                // Chuyển đổi SalDate từ Unix timestamp
-                var date = new Date(entry.SalDate);
-                date.setHours(date.getHours() + 6); // Adjust timezone by adding 6 hours
-                var dayDifference = Math.floor((today - date) / (1000 * 60 * 60 * 24));
+        onRefreshPress: function() {
+            // Reset DateRangeSelection về 7 ngày gần nhất
+            var oDateRange = this.byId("dateRangeSelection");
+            var oEndDate = new Date();
+            var oStartDate = new Date();
+            oStartDate.setDate(oStartDate.getDate() - 7);
+            
+            // Set lại giá trị cho DateRangeSelection
+            oDateRange.setDateValue(oStartDate);
+            oDateRange.setSecondDateValue(oEndDate);
+            
+            // Load lại dữ liệu với khoảng thời gian mặc định
+            this.loadChartData(this.getView().getModel("dataModel"));
+        },
 
-                if (dayDifference >= 0 && dayDifference < 15) {
-                    var dateString = date.toISOString().split('T')[0];
-                    if (!accessCounts[dateString]) {
-                        accessCounts[dateString] = { date: dateString, count: 0 };
-                    }
-                    accessCounts[dateString].count++;
+        loadChartDataWithDateRange: function(startDateTime, endDateTime) {
+            var oDataModel = this.getView().getModel("dataModel");
+            
+            oDataModel.read("/SalogCountSet", {
+                urlParameters: {
+                    "$filter": "StartDateTime eq datetime'" + startDateTime + "' and EndDateTime eq datetime'" + endDateTime + "' and Step eq '1d'",
+                    "$format": "json"
+                },
+                success: function (oData) {
+                    var formattedData = oData.results.map(function(item) {
+                        return {
+                            ...item,
+                            StartDateTime: new Date(item.StartDateTime).toISOString().split('T')[0],
+                            MediumCount: item.MediumCount,
+                            HighCount: item.HighCount
+                        };
+                    });
+                    
+                    var oModel = new JSONModel({
+                        results: formattedData
+                    });
+                    this.getView().setModel(oModel, "processedDataModel");
+                }.bind(this),
+                error: function (oError) {
+                    console.error("Error fetching data from OData service", oError);
                 }
             });
-
-            return Object.values(accessCounts);
-        }
+        },
     });
 }); 

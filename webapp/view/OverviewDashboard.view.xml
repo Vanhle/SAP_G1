@@ -30,11 +30,30 @@
                             />
                         </layoutData>
                         <VBox id="_IDGenVBox">
-                            <Button
-                                id="_IDGenButton"
-                                text="View Details"
-                                press="onViewDetail"
-                            />
+                            <HBox
+                                id="_IDGenHBox"
+                                class="sapUiSmallMarginBottom"
+                            >
+                                <Button
+                                    id="_IDGenButton"
+                                    text="View Details"
+                                    press="onViewDetail"
+                                />
+                                <DateRangeSelection
+                                    id="dateRangeSelection"
+                                    change="onDateRangeChange"
+                                    displayFormat="yyyy-MM-dd"
+                                    delimiter="-"
+                                    width="300px"
+                                />
+                                <Button
+                                    id="refreshButton"
+                                    icon="sap-icon://refresh"
+                                    press="onRefreshPress"
+                                    tooltip="Refresh Data"
+                                />
+                            </HBox>
+
                             <viz:VizFrame
                                 id="idVizFrameColumn"
                                 uiConfig="{applicationSet:'fiori'}"
@@ -45,20 +64,25 @@
                                 <viz:dataset>
                                     <viz.data:FlattenedDataset
                                         id="processedDataFlattenedDataset"
-                                        data="{processedDataModel>/}"
+                                        data="{processedDataModel>/results}"
                                     >
                                         <viz.data:dimensions>
                                             <viz.data:DimensionDefinition
                                                 id="processedDataDimensionDefinition"
                                                 name="Date"
-                                                value="{processedDataModel>date}"
+                                                value="{processedDataModel>StartDateTime}"
                                             />
                                         </viz.data:dimensions>
                                         <viz.data:measures>
                                             <viz.data:MeasureDefinition
-                                                id="processedDataMeasureDefinition"
-                                                name="Access Count"
-                                                value="{processedDataModel>count}"
+                                                id="processedDataMeasureDefinitionMedium"
+                                                name="Medium Count"
+                                                value="{processedDataModel>MediumCount}"
+                                            />
+                                            <viz.data:MeasureDefinition
+                                                id="processedDataMeasureDefinitionHigh"
+                                                name="High Count"
+                                                value="{processedDataModel>HighCount}"
                                             />
                                         </viz.data:measures>
                                     </viz.data:FlattenedDataset>
@@ -68,7 +92,7 @@
                                         id="processedDataFeedItem1"
                                         uid="valueAxis"
                                         type="Measure"
-                                        values="Access Count"
+                                        values="Medium Count,High Count"
                                     />
                                     <viz.feeds:FeedItem
                                         id="processedDataFeedItem2"
