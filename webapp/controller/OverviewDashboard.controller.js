@@ -53,7 +53,7 @@ sap.ui.define([
 
         getStartDateTime: function() {
             var startDate = new Date();
-            startDate.setDate(startDate.getDate() - 10); // Trừ đi 7 ngày
+            startDate.setDate(startDate.getDate() - 7); // Trừ đi 7 ngày
             // startDate.setHours(0, 0, 0, 0); // Set giờ về 00:00:00
             
             // Tạo string datetime với offset +07:00
@@ -72,19 +72,17 @@ sap.ui.define([
             return hours + ':' + minutes + ':' + seconds;
         },
 
-        loadChartData: function(oDataModel) {
-            var endDateTime = this.getCurrentDateTime();
-            console.log("endDateTime: " + endDateTime);
-            var startDateTime = this.getStartDateTime();
-            console.log("startDateTime: " + startDateTime);
-
+        loadChartDataWithParams: function(startDateTime, endDateTime, step) {
+            var oDataModel = this.getView().getModel("dataModel");
+            // Nếu không có step thì lấy từ Select
+            step = step || this.byId("stepSelect").getSelectedKey() || "1d";
+            
             oDataModel.read("/SalogCountSet", {
                 urlParameters: {
-                    "$filter": "StartDateTime eq datetime'" + startDateTime + "' and EndDateTime eq datetime'" + endDateTime + "' and Step eq '1d'",
+                    "$filter": "StartDateTime eq datetime'" + startDateTime + "' and EndDateTime eq datetime'" + endDateTime + "' and Step eq '" + step + "'",
                     "$format": "json"
                 },
                 success: function (oData) {
-                    // Xử lý và format lại dữ liệu
                     var formattedData = oData.results.map(function(item) {
                         return {
                             ...item,
@@ -103,6 +101,13 @@ sap.ui.define([
                     console.error("Error fetching data from OData service", oError);
                 }
             });
+        },
+
+        loadChartData: function(oDataModel) {
+            var endDateTime = this.getCurrentDateTime();
+            var startDateTime = this.getStartDateTime();
+
+            this.loadChartDataWithParams(startDateTime, endDateTime, "1d");
 
             // Load các model khác
             var oLogModel = new JSONModel();
@@ -195,7 +200,7 @@ sap.ui.define([
             if (oStartDate && oEndDate) {
                 var startDateTime = this.formatDateToDateTime(oStartDate, true);
                 var endDateTime = this.formatDateToDateTime(oEndDate, false);
-                this.loadChartDataWithDateRange(startDateTime, endDateTime);
+                this.loadChartDataWithParams(startDateTime, endDateTime);
             }
         },
 
@@ -206,6 +211,19 @@ sap.ui.define([
             var time = isStartDate ? "00:00:00" : "17:00:00";
             
             return `${year}-${month}-${day}T${time}`;
+        },
+
+        onStepChange: function(oEvent) {
+            var sSelectedStep = oEvent.getParameter("selectedItem").getKey();
+            var oDateRange = this.byId("dateRangeSelection");
+            var oStartDate = oDateRange.getDateValue();
+            var oEndDate = oDateRange.getSecondDateValue();
+            
+            if (oStartDate && oEndDate) {
+                var startDateTime = this.formatDateToDateTime(oStartDate, true);
+                var endDateTime = this.formatDateToDateTime(oEndDate, false);
+                this.loadChartDataWithParams(startDateTime, endDateTime, sSelectedStep);
+            }
         },
 
         onRefreshPress: function() {
@@ -219,37 +237,12 @@ sap.ui.define([
             oDateRange.setDateValue(oStartDate);
             oDateRange.setSecondDateValue(oEndDate);
             
+            // Reset Step về 1d
+            var oStepSelect = this.byId("stepSelect");
+            oStepSelect.setSelectedKey("1d");
+            
             // Load lại dữ liệu với khoảng thời gian mặc định
             this.loadChartData(this.getView().getModel("dataModel"));
-        },
-
-        loadChartDataWithDateRange: function(startDateTime, endDateTime) {
-            var oDataModel = this.getView().getModel("dataModel");
-            
-            oDataModel.read("/SalogCountSet", {
-                urlParameters: {
-                    "$filter": "StartDateTime eq datetime'" + startDateTime + "' and EndDateTime eq datetime'" + endDateTime + "' and Step eq '1d'",
-                    "$format": "json"
-                },
-                success: function (oData) {
-                    var formattedData = oData.results.map(function(item) {
-                        return {
-                            ...item,
-                            StartDateTime: new Date(item.StartDateTime).toISOString().split('T')[0],
-                            MediumCount: item.MediumCount,
-                            HighCount: item.HighCount
-                        };
-                    });
-                    
-                    var oModel = new JSONModel({
-                        results: formattedData
-                    });
-                    this.getView().setModel(oModel, "processedDataModel");
-                }.bind(this),
-                error: function (oError) {
-                    console.error("Error fetching data from OData service", oError);
-                }
-            });
         },
     });
 }); 

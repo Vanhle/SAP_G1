@@ -8,6 +8,7 @@
     xmlns:layout="sap.ui.layout"
     xmlns:card="sap.f.cards"
     xmlns:f="sap.f"
+    xmlns:core="sap.ui.core"
 >
     <Page
         id="page"
@@ -46,11 +47,27 @@
                                     delimiter="-"
                                     width="300px"
                                 />
+                                <Select
+                                    id="stepSelect"
+                                    width="100px"
+                                    change="onStepChange"
+                                    selectedKey="1d"
+                                    class="sapUiSmallMarginBegin"
+                                >
+                                    <items>
+                                        <core:Item id="_IDGenItem1" key="1d" text="1 Day"/>
+                                        <core:Item id="_IDGenItem2" key="2d" text="2 Days"/>
+                                        <core:Item id="_IDGenItem3" key="3d" text="3 Days"/>
+                                        <core:Item id="_IDGenItem4" key="4d" text="4 Days"/>
+                                        <core:Item id="_IDGenItem5" key="5d" text="5 Days"/>
+                                    </items>
+                                </Select>
                                 <Button
                                     id="refreshButton"
                                     icon="sap-icon://refresh"
                                     press="onRefreshPress"
                                     tooltip="Refresh Data"
+                                    class="sapUiSmallMarginBegin"
                                 />
                             </HBox>
 
