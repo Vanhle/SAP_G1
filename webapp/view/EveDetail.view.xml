@@ -2,20 +2,128 @@
     controllerName="overviewdashboard.projectdashboard.controller.EveDetail"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
-    xmlns:html="http://www.w3.org/1999/xhtml"
->
-    <Page id="_IDGenPage1" >
-        <Breadcrumbs
-            id="_IDGenBreadcrumbs1"
-            currentLocationText="Details event by day"
-            separatorStyle="{/selected}"
-            class="fullScreenMargin"
-        >
-            <Link
-                id="_IDGenLink"
-                press="onHomePress"
-                text="Home"
-            />                       
-        </Breadcrumbs>
+    xmlns:f="sap.f"
+    xmlns:core="sap.ui.core">
+    
+    <Page id="_IDGenPage1" showHeader="false" title="Event Details">
+        <!-- <headerContent>
+            <Button id="_IDGenButton4" icon="sap-icon://nav-back" press="onNavBack"/>
+        </headerContent> -->
+        
+        <f:DynamicPage id="_IDGenDynamicPage">
+            <f:header>
+                <f:DynamicPageHeader id="_IDGenDynamicPageHeader" pinnable="true">
+                    <f:content>
+                        <!-- Filters -->
+                        <VBox id="_IDGenVBox4">
+                            <HBox id="_IDGenHBox4">
+                                <DateRangeSelection
+                                    id="detailDateRange"
+                                    change="onDateRangeChange"
+                                    displayFormat="yyyy-MM-dd"
+                                    delimiter="-"
+                                    width="300px"/>
+                                    
+                                <MultiComboBox
+                                    id="severityFilter"
+                                    placeholder="Severity"
+                                    items="{
+                                        path: 'filterModel>/severityLevels'
+                                    }">
+                                    <core:Item id="_IDGenItem" key="{filterModel>key}" text="{filterModel>text}"/>
+                                </MultiComboBox>
+                                
+                                <SearchField
+                                    id="messageSearch"
+                                    width="300px"
+                                    search="onSearch"
+                                    placeholder="Search message..."/>
+                            </HBox>
+                        </VBox>
+                    </f:content>
+                </f:DynamicPageHeader>
+            </f:header>
+            
+            <f:content>
+                <VBox id="_IDGenVBox6">
+                    <!-- Statistics Cards -->
+                    <HBox id="_IDGenHBox5" class="sapUiSmallMarginBegin sapUiSmallMarginTopBottom" wrap="Wrap">
+                        <GenericTile id="_IDGenGenericTile" header="Total Events" subheader="Today" class="sapUiSmallMarginEnd">
+                            <TileContent id="_IDGenTileContent">
+                                <NumericContent id="_IDGenNumericContent" value="{/totalEvents}"/>
+                            </TileContent>
+                        </GenericTile>
+                        
+                        <GenericTile id="_IDGenGenericTile1" header="High Severity" subheader="Critical" class="sapUiSmallMarginEnd">
+                            <TileContent id="_IDGenTileContent1">
+                                <NumericContent id="_IDGenNumericContent1" 
+                                    value="{/highSeverity}"
+                                    valueColor="Error"/>
+                            </TileContent>
+                        </GenericTile>
+                    </HBox>
+                    
+                    <!-- Main Table -->
+                    <Table
+                        id="eventTable"
+                        items="{
+                            path: '/events',
+                            sorter: {
+                                path: 'timestamp',
+                                descending: true
+                            }
+                        }"
+                        growing="true"
+                        growingThreshold="20">
+                        <columns>
+                            <Column id="_IDGenColumn">
+                                <Text id="_IDGenText" text="Date/Time"/>
+                            </Column>
+                            <Column id="_IDGenColumn1">
+                                <Text id="_IDGenText1" text="Event ID"/>
+                            </Column>
+                            <Column id="_IDGenColumn2" width="30%">
+                                <Text id="_IDGenText2" text="Message"/>
+                            </Column>
+                            <Column id="_IDGenColumn3">
+                                <Text id="_IDGenText3" text="Severity"/>
+                            </Column>
+                            <Column id="_IDGenColumn4">
+                                <Text id="_IDGenText4" text="System"/>
+                            </Column>
+                            <Column id="_IDGenColumn5">
+                                <Text id="_IDGenText5" text="Status"/>
+                            </Column>
+                        </columns>
+                        
+                        <items>
+                            <ColumnListItem id="_IDGenColumnListItem">
+                                <cells>
+                                    <Text id="_IDGenText6" text="{
+                                        path: 'timestamp',
+                                        formatter: '.formatter.formatDateTime'
+                                    }"/>
+                                    <Text id="_IDGenText7" text="{eventId}"/>
+                                    <Text id="_IDGenText8" text="{message}"/>
+                                    <ObjectStatus id="_IDGenObjectStatus"
+                                        text="{severity}"
+                                        state="{
+                                            path: 'severity',
+                                            formatter: '.formatter.formatSeverityState'
+                                        }"/>
+                                    <Text id="_IDGenText9" text="{system}"/>
+                                    <ObjectStatus id="_IDGenObjectStatus1"
+                                        text="{status}"
+                                        state="{
+                                            path: 'status',
+                                            formatter: '.formatter.formatStatusState'
+                                        }"/>
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
+                </VBox>
+            </f:content>
+        </f:DynamicPage>
     </Page>
 </mvc:View>
