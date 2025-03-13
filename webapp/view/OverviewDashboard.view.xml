@@ -46,6 +46,7 @@
                                     displayFormat="yyyy-MM-dd"
                                     delimiter="-"
                                     width="300px"
+                                    class="sapUiSmallMarginBegin"
                                 />
                                 <Select
                                     id="stepSelect"
@@ -55,11 +56,31 @@
                                     class="sapUiSmallMarginBegin"
                                 >
                                     <items>
-                                        <core:Item id="_IDGenItem1" key="1d" text="1 Day"/>
-                                        <core:Item id="_IDGenItem2" key="2d" text="2 Days"/>
-                                        <core:Item id="_IDGenItem3" key="3d" text="3 Days"/>
-                                        <core:Item id="_IDGenItem4" key="4d" text="4 Days"/>
-                                        <core:Item id="_IDGenItem5" key="5d" text="5 Days"/>
+                                        <core:Item
+                                            id="_IDGenItem1"
+                                            key="1d"
+                                            text="1 Day"
+                                        />
+                                        <core:Item
+                                            id="_IDGenItem2"
+                                            key="2d"
+                                            text="2 Days"
+                                        />
+                                        <core:Item
+                                            id="_IDGenItem3"
+                                            key="3d"
+                                            text="3 Days"
+                                        />
+                                        <core:Item
+                                            id="_IDGenItem4"
+                                            key="4d"
+                                            text="4 Days"
+                                        />
+                                        <core:Item
+                                            id="_IDGenItem5"
+                                            key="5d"
+                                            text="5 Days"
+                                        />
                                     </items>
                                 </Select>
                                 <Button
@@ -132,11 +153,16 @@
                             />
                         </layoutData>
                         <VBox id="_IDGenVBoxHorizontal">
-                            <Button
-                                id="_IDGenButton3"
-                                text="View Details"
-                                press="onViewDetail"
-                            />
+                            <HBox
+                                id="_IDGenHBox3"
+                                class="sapUiSmallMarginBottom"
+                            >
+                                <Button
+                                    id="_IDGenButton3"
+                                    text="View Details"
+                                    press="onViewDetail"
+                                />
+                            </HBox>
                             <viz:VizFrame
                                 id="idVizFrameHorizontal"
                                 uiConfig="{applicationSet:'fiori'}"
