@@ -20,6 +20,12 @@ sap.ui.define([
          * @public
          */
         onInit: function () {
+            // Thêm viewModel để quản lý trạng thái busy
+            var oViewModel = new JSONModel({
+                busy: false
+            });
+            this.getView().setModel(oViewModel, "viewModel");
+
             // Khởi tạo OData Model
             var oDataModel = new ODataModel("/sap/opu/odata/sap/ZL253_TEST_SM20_SEGW_SRV/");
             this.getView().setModel(oDataModel, "dataModel");
@@ -128,10 +134,12 @@ sap.ui.define([
                 method: "POST",
                 success: function () {
                     this.loadChartData(oDataModel);
+                    console.log("Trigger ZG1SALV success");
                 }.bind(this),
                 error: function (oError) {
                     console.error("Error triggering ZG1SALV", oError);
                     this.loadChartData(oDataModel);
+                    console.log("Trigger ZG1SALV error");
                 }.bind(this)
             });
         },
@@ -144,6 +152,9 @@ sap.ui.define([
          * @private
          */
         _loadChartDataWithParams: function (startDateTime, endDateTime, step) {
+            // Set busy state
+            this.getView().getModel("viewModel").setProperty("/busy", true);
+
             var oDataModel = this.getView().getModel("dataModel");
             step = step || this.byId("stepSelect").getSelectedKey() || "1d";
 
@@ -154,8 +165,16 @@ sap.ui.define([
                         "' and Step eq '" + step + "'",
                     "$format": "json"
                 },
-                success: this._onDataLoadSuccess.bind(this),
-                error: this._onDataLoadError.bind(this)
+                success: function(oData) {
+                    this._onDataLoadSuccess(oData);
+                    // Reset busy state
+                    this.getView().getModel("viewModel").setProperty("/busy", false);
+                }.bind(this),
+                error: function(oError) {
+                    this._onDataLoadError(oError);
+                    // Reset busy state on error
+                    this.getView().getModel("viewModel").setProperty("/busy", false);
+                }.bind(this)
             });
         },
 
