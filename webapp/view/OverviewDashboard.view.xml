@@ -144,7 +144,7 @@
                             </viz:VizFrame>
                         </VBox>
                     </Panel>
-                    <Panel
+                    <!-- <Panel
                         id="_IDGenPanelHorizontal"
                         width="100%"
                     >
@@ -209,7 +209,7 @@
                                 </viz:feeds>
                             </viz:VizFrame>
                         </VBox>
-                    </Panel>
+                    </Panel> -->
                     <Panel
                         id="_IDGenPanel1"
                         width="100%"
@@ -217,21 +217,36 @@
                         <layoutData>
                             <layout:GridData
                                 id="_IDGenGridData2"
-                                span="L3 M3 S12"
+                                span="L6 M6 S12"
                             />
                         </layoutData>
                         <VBox id="_IDGenVBox1">
-                            <Button
-                                id="_IDGenButton1"
-                                text="View Details"
-                                press="onViewDetail"
-                            />
+                            <HBox id="_IDGenHBox7" class="sapUiSmallMarginBottom">
+                                <Button
+                                    id="_IDGenButton1"
+                                    text="View Details"
+                                    press="onViewDetail"
+                                />
+                                <Select
+                                    id="chartTypeSelect"
+                                    selectedKey="pie"
+                                    change="onChartTypeChange"
+                                    class="sapUiSmallMarginBegin"
+                                >
+                                    <items>
+                                        <core:Item id="_IDGenItem6" key="pie" text="Pie Chart"/>
+                                        <core:Item id="_IDGenItem7" key="column" text="Column Chart"/>
+                                    </items>
+                                </Select>
+                            </HBox>
                             <viz:VizFrame
                                 id="idVizFramePie"
                                 uiConfig="{applicationSet:'fiori'}"
-                                vizType="pie"
+                                vizType="{viewModel>/pieChartType}"
                                 width="100%"
                                 height="400px"
+                                busy="{viewModel>/pieBusy}"
+                                busyIndicatorDelay="0"
                             >
                                 <viz:dataset>
                                     <viz.data:FlattenedDataset
