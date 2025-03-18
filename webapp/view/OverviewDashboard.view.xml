@@ -227,22 +227,11 @@
                                     text="View Details"
                                     press="onViewDetail"
                                 />
-                                <Select
-                                    id="chartTypeSelect"
-                                    selectedKey="pie"
-                                    change="onChartTypeChange"
-                                    class="sapUiSmallMarginBegin"
-                                >
-                                    <items>
-                                        <core:Item id="_IDGenItem7" key="pie" text="Pie Chart"/>
-                                        <core:Item id="_IDGenItem8" key="column" text="Column Chart"/>
-                                    </items>
-                                </Select>
                             </HBox>
                             <viz:VizFrame
                                 id="idVizFramePie"
                                 uiConfig="{applicationSet:'fiori'}"
-                                vizType="{viewModel>/pieChartType}"
+                                vizType="bar"
                                 width="100%"
                                 height="400px"
                                 busy="{viewModel>/pieBusy}"
@@ -272,13 +261,13 @@
                                 <viz:feeds>
                                     <viz.feeds:FeedItem
                                         id="_IDGenFeedItem3"
-                                        uid="{= ${viewModel>/pieChartType} === 'pie' ? 'size' : 'valueAxis'}"
+                                        uid="valueAxis"
                                         type="Measure"
                                         values="Count"
                                     />
                                     <viz.feeds:FeedItem
                                         id="_IDGenFeedItem4"
-                                        uid="{= ${viewModel>/pieChartType} === 'pie' ? 'color' : 'categoryAxis'}"
+                                        uid="categoryAxis"
                                         type="Dimension"
                                         values="Log Type"
                                     />

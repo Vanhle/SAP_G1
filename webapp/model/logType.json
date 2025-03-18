@@ -1,0 +1,350 @@
+[
+    {
+      "code": "AU1",
+      "description": "Logon successful."
+    },
+    {
+      "code": "AU2",
+      "description": "Logon failed."
+    },
+    {
+      "code": "AUC",
+      "description": "User logoff."
+    },
+    {
+      "code": "AUM",
+      "description": "User locked in client after erroneous password checks."
+    },
+    {
+      "code": "AUN",
+      "description": "User in client unlocked after being locked due to invalid password."
+    },
+    {
+      "code": "AUO",
+      "description": "Logon failed."
+    },
+    {
+      "code": "BUD",
+      "description": "WS: Delayed logon failed. Refer to Web service log."
+    },
+    {
+      "code": "CUA",
+      "description": "Rejected assertion."
+    },
+    {
+      "code": "CUB",
+      "description": "SAML 2.0 Logon."
+    },
+    {
+      "code": "CUC",
+      "description": "SAML 2.0 Logon"
+    },
+    {
+      "code": "CUD",
+      "description": "Subject Name ID."
+    },
+    {
+      "code": "CUE",
+      "description": "Attribute value."
+    },
+    {
+      "code": "CUF",
+      "description": "Authentication assertion."
+    },
+    {
+      "code": "CUG",
+      "description": "Signed logout request rejected."
+    },
+    {
+      "code": "CUH",
+      "description": "Unsigned logout request rejected."
+    },
+    {
+      "code": "BUE",
+      "description": "WS: Delayed logon successful. Refer to Web service log."
+    },
+    {
+      "code": "BUK",
+      "description": "Assertion used."
+    },
+    {
+      "code": "BUL",
+      "description": "SAML 2.0 Logon."
+    },
+    {
+      "code": "BUM",
+      "description": "Subject Name ID."
+    },
+    {
+      "code": "BUN",
+      "description": "Attribute value."
+    },
+    {
+      "code": "BUO",
+      "description": "Authentication assertion."
+    },
+    {
+      "code": "BUP",
+      "description": "SAML 2.0 Logon"
+    },
+    {
+      "code": "BUQ",
+      "description": "Signed logout request accepted."
+    },
+    {
+      "code": "BUR",
+      "description": "Unsigned logout request accepted."
+    },
+    {
+      "code": "AU5",
+      "description": "RFC/CPIC logon successful."
+    },
+    {
+      "code": "AU6",
+      "description": "RFC/CPIC logon failed."
+    },
+    {
+      "code": "AUK",
+      "description": "Successful RFC call."
+    },
+    {
+      "code": "AUL",
+      "description": "Failed RFC call."
+    },
+    {
+      "code": "CUV",
+      "description": "Successful WS call."
+    },
+    {
+      "code": "CUW",
+      "description": "Failed Web service call."
+    },
+    {
+      "code": "CUZ",
+      "description": "Generic table access by RFC with activity."
+    },
+    {
+      "code": "AU3",
+      "description": "Transaction started."
+    },
+    {
+      "code": "AU4",
+      "description": "Start of transaction failed."
+    },
+    {
+      "code": "AUP",
+      "description": "Transaction locked."
+    },
+    {
+      "code": "AUQ",
+      "description": "Transaction unlocked."
+    },
+    {
+      "code": "AUW",
+      "description": "Report started."
+    },
+    {
+      "code": "AUX",
+      "description": "Start report failed."
+    },
+    {
+      "code": "AU7",
+      "description": "User created."
+    },
+    {
+      "code": "AU8",
+      "description": "User deleted."
+    },
+    {
+      "code": "AU9",
+      "description": "User locked."
+    },
+    {
+      "code": "AUA",
+      "description": "User unlocked."
+    },
+    {
+      "code": "AUB",
+      "description": "Authorizations for user were changed."
+    },
+    {
+      "code": "AUD",
+      "description": "User master record was changed."
+    },
+    {
+      "code": "AUU",
+      "description": "Object activated."
+    },
+    {
+      "code": "AUR",
+      "description": "Object created."
+    },
+    {
+      "code": "AUS",
+      "description": "Object deleted."
+    },
+    {
+      "code": "AUT",
+      "description": "Object changed."
+    },
+    {
+      "code": "BU2",
+      "description": "Password changed for user in client."
+    },
+    {
+      "code": "AUE",
+      "description": "Audit configuration changed."
+    },
+    {
+      "code": "AUF",
+      "description": "Audit event for user in client."
+    },
+    {
+      "code": "AUG",
+      "description": "Application server started."
+    },
+    {
+      "code": "AUH",
+      "description": "Application server stopped."
+    },
+    {
+      "code": "AUI",
+      "description": "Audit: slot inactive."
+    },
+    {
+      "code": "AUJ",
+      "description": "Audit: Activity status changed."
+    },
+    {
+      "code": "AUV",
+      "description": "Digital signature error."
+    },
+    {
+      "code": "AUY",
+      "description": "Download bytes to file."
+    },
+    {
+      "code": "AUZ",
+      "description": "Digital Signature."
+    },
+    {
+      "code": "BU0",
+      "description": "Security audit log event."
+    },
+    {
+      "code": "BU1",
+      "description": "Password check failed for user in client."
+    },
+    {
+      "code": "BU3",
+      "description": "Change security check during export."
+    },
+    {
+      "code": "BU4",
+      "description": "Transport request contains security-critical source objects."
+    },
+    {
+      "code": "BU5",
+      "description": "ICF Recorder entry executed for user."
+    },
+    {
+      "code": "BU6",
+      "description": "ICF Recorder entry executed by user."
+    },
+    {
+      "code": "BU7",
+      "description": "Administration setting was changed for ICF Recorder."
+    },
+    {
+      "code": "BU8",
+      "description": "Virus Scan Interface: Virus found by profile."
+    },
+    {
+      "code": "BU9",
+      "description": "Virus Scan Interface: Error occurred in profile."
+    },
+    {
+      "code": "BUA",
+      "description": "WS: Signature check error. Refer to Web service log."
+    },
+    {
+      "code": "BUB",
+      "description": "WS: Signature insufficient. Refer to Web service log."
+    },
+    {
+      "code": "BUC",
+      "description": "WS: Time stamp is invalid. Refer to Web service log."
+    },
+    {
+      "code": "BUF",
+      "description": "HTTP Security Session Management was activated."
+    },
+    {
+      "code": "BUG",
+      "description": "HTTP Security Session Management was deactivated for client."
+    },
+    {
+      "code": "BUH",
+      "description": "HTTP Security Session of user and client was hard exited."
+    },
+    {
+      "code": "BUY",
+      "description": "Field contents changed."
+    },
+    {
+      "code": "BUZ",
+      "description": "Audit event: program line and event."
+    },
+    {
+      "code": "CU0",
+      "description": "Security audit log event."
+    },
+    {
+      "code": "CUK",
+      "description": "C debugging activated."
+    },
+    {
+      "code": "CUL",
+      "description": "Field content changed."
+    },
+    {
+      "code": "CUM",
+      "description": "Jump to ABAP Debugger."
+    },
+    {
+      "code": "CUN",
+      "description": "A manually caught process was stopped from within the debugger."
+    },
+    {
+      "code": "CUO",
+      "description": "Explicit database commit or rollback from debugger."
+    },
+    {
+      "code": "CUP",
+      "description": "Non-exclusive debugging session started."
+    },
+    {
+      "code": "CUQ",
+      "description": "Logical file name not configured. Physical file name not checked."
+    },
+    {
+      "code": "CUR",
+      "description": "Physical file name does not meet requirements set by logical file name."
+    },
+    {
+      "code": "CUS",
+      "description": "Logical file name is not a valid alias for logical file name."
+    },
+    {
+      "code": "CUT",
+      "description": "No validation is active for logical file name."
+    },
+    {
+      "code": "CUY",
+      "description": "Object operation."
+    },
+    {
+      "code": "AU0",
+      "description": "Audit - Test."
+    }
+  ]

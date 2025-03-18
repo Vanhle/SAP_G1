@@ -23,8 +23,7 @@ sap.ui.define([
             // Thêm viewModel để quản lý trạng thái busy
             var oViewModel = new JSONModel({
                 busy: false,
-                pieBusy: false,
-                pieChartType: "pie"
+                pieBusy: false
             });
             this.getView().setModel(oViewModel, "viewModel");
 
@@ -94,69 +93,6 @@ sap.ui.define([
         onViewDetail: function () {
             var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
             oRouter.navTo("EveDetail");
-        },
-
-        /**
-         * Xử lý sự kiện khi thay đổi loại biểu đồ
-         * @param {sap.ui.base.Event} oEvent Event object
-         * @public
-         */
-        onChartTypeChange: function(oEvent) {
-            var sSelectedType = oEvent.getParameter("selectedItem").getKey();
-            var oViewModel = this.getView().getModel("viewModel");
-            
-            // Set busy state
-            oViewModel.setProperty("/pieBusy", true);
-            
-            // Đổi kiểu biểu đồ
-            oViewModel.setProperty("/pieChartType", sSelectedType);
-            
-            // Cập nhật properties cho biểu đồ
-            var oVizFrame = this.byId("idVizFramePie");
-            this._updateChartProperties(oVizFrame, sSelectedType);
-            
-            // Reset busy state sau 500ms để có animation
-            setTimeout(function() {
-                oViewModel.setProperty("/pieBusy", false);
-            }, 500);
-        },
-
-        _updateChartProperties: function(oVizFrame, sChartType) {
-            if (sChartType === "column") {
-                oVizFrame.setVizProperties({
-                    title: {
-                        text: "Log Type Distribution"
-                    },
-                    plotArea: {
-                        dataLabel: {
-                            visible: true,
-                            position: "outside"
-                        }
-                    },
-                    valueAxis: {
-                        title: {
-                            visible: false
-                        }
-                    },
-                    categoryAxis: {
-                        title: {
-                            visible: false
-                        }
-                    }
-                });
-            } else {
-                oVizFrame.setVizProperties({
-                    title: {
-                        text: "Log Type"
-                    },
-                    plotArea: {
-                        dataLabel: {
-                            visible: true,
-                            position: "outside"
-                        }
-                    }
-                });
-            }
         },
 
         /* =========================================================== */
@@ -448,43 +384,27 @@ sap.ui.define([
 
                     // Cập nhật properties cho biểu đồ
                     var oVizFrame = this.byId("idVizFramePie");
-                    var sChartType = this.getView().getModel("viewModel").getProperty("/pieChartType");
-                    
-                    if (sChartType === "column") {
-                        oVizFrame.setVizProperties({
-                            title: {
-                                text: "Log Type Distribution"
-                            },
-                            plotArea: {
-                                dataLabel: {
-                                    visible: true,
-                                    position: "outside"
-                                }
-                            },
-                            valueAxis: {
-                                title: {
-                                    visible: false
-                                }
-                            },
-                            categoryAxis: {
-                                title: {
-                                    visible: false
-                                }
+                    oVizFrame.setVizProperties({
+                        title: {
+                            text: "Log Type Distribution"
+                        },
+                        plotArea: {
+                            dataLabel: {
+                                visible: true,
+                                position: "outside"
                             }
-                        });
-                    } else {
-                        oVizFrame.setVizProperties({
+                        },
+                        valueAxis: {
                             title: {
-                                text: "Log Type"
-                            },
-                            plotArea: {
-                                dataLabel: {
-                                    visible: true,
-                                    position: "outside"
-                                }
+                                visible: false
                             }
-                        });
-                    }
+                        },
+                        categoryAxis: {
+                            title: {
+                                visible: false
+                            }
+                        }
+                    });
 
                     // Reset busy state sau khi load xong dữ liệu
                     this.getView().getModel("viewModel").setProperty("/pieBusy", false);
