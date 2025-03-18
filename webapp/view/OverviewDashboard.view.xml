@@ -234,8 +234,8 @@
                                     class="sapUiSmallMarginBegin"
                                 >
                                     <items>
-                                        <core:Item id="_IDGenItem6" key="pie" text="Pie Chart"/>
-                                        <core:Item id="_IDGenItem7" key="column" text="Column Chart"/>
+                                        <core:Item id="_IDGenItem7" key="pie" text="Pie Chart"/>
+                                        <core:Item id="_IDGenItem8" key="column" text="Column Chart"/>
                                     </items>
                                 </Select>
                             </HBox>
@@ -272,13 +272,13 @@
                                 <viz:feeds>
                                     <viz.feeds:FeedItem
                                         id="_IDGenFeedItem3"
-                                        uid="size"
+                                        uid="{= ${viewModel>/pieChartType} === 'pie' ? 'size' : 'valueAxis'}"
                                         type="Measure"
                                         values="Count"
                                     />
                                     <viz.feeds:FeedItem
                                         id="_IDGenFeedItem4"
-                                        uid="color"
+                                        uid="{= ${viewModel>/pieChartType} === 'pie' ? 'color' : 'categoryAxis'}"
                                         type="Dimension"
                                         values="Log Type"
                                     />

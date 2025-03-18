@@ -111,9 +111,18 @@ sap.ui.define([
             // Đổi kiểu biểu đồ
             oViewModel.setProperty("/pieChartType", sSelectedType);
             
-            // Cập nhật lại properties của biểu đồ
+            // Cập nhật properties cho biểu đồ
             var oVizFrame = this.byId("idVizFramePie");
-            if (sSelectedType === "column") {
+            this._updateChartProperties(oVizFrame, sSelectedType);
+            
+            // Reset busy state sau 500ms để có animation
+            setTimeout(function() {
+                oViewModel.setProperty("/pieBusy", false);
+            }, 500);
+        },
+
+        _updateChartProperties: function(oVizFrame, sChartType) {
+            if (sChartType === "column") {
                 oVizFrame.setVizProperties({
                     title: {
                         text: "Log Type Distribution"
@@ -148,11 +157,6 @@ sap.ui.define([
                     }
                 });
             }
-            
-            // Giả lập loading time
-            setTimeout(function() {
-                oViewModel.setProperty("/pieBusy", false);
-            }, 800);
         },
 
         /* =========================================================== */
@@ -329,11 +333,7 @@ sap.ui.define([
             var startDateTime = this.getStartDateTime();
 
             this._loadChartDataWithParams(startDateTime, endDateTime, "1d");
-
-            // Load các model khác
-            var oLogModel = new JSONModel();
-            oLogModel.loadData("../model/logData.json");
-            this.getView().setModel(oLogModel, "logDataModel");
+            this._loadLogTypeData(oDataModel);  // Load dữ liệu Log Type từ OData
 
             // Tạo mô hình JSON và tải dữ liệu cho biểu đồ severity
             var oSeverityModel = new JSONModel();
@@ -390,18 +390,18 @@ sap.ui.define([
             });
 
             // Set title for the severity chart
-            var oVizFrameHorizontal = this.byId("idVizFrameHorizontal");
-            oVizFrameHorizontal.setVizProperties({
-                title: {
-                    text: "Severity Levels"
-                },
-                plotArea: {
-                    dataLabel: {
-                        visible: true,
-                        position: "outside"
-                    }
-                }
-            });
+            // var oVizFrameHorizontal = this.byId("idVizFrameHorizontal");
+            // oVizFrameHorizontal.setVizProperties({
+            //     title: {
+            //         text: "Severity Levels"
+            //     },
+            //     plotArea: {
+            //         dataLabel: {
+            //             visible: true,
+            //             position: "outside"
+            //         }
+            //     }
+            // });
 
             // Set title for the event time chart
             var oEventTimeVizFrame = this.byId("eventTimeVizFrame");
@@ -415,6 +415,88 @@ sap.ui.define([
                         position: "outside"
                     }
                 }
+            });
+        },
+
+        /**
+         * Load dữ liệu cho biểu đồ Log Type
+         * @param {sap.ui.model.odata.v2.ODataModel} oDataModel OData model
+         * @private
+         */
+        _loadLogTypeData: function(oDataModel) {
+            // Set busy state
+            this.getView().getModel("viewModel").setProperty("/pieBusy", true);
+
+            oDataModel.read("/SalogTypeCountSet", {
+                urlParameters: {                   
+                    "$format": "json"
+                },
+                success: function(oData) {
+                    // Format dữ liệu trả về
+                    var formattedData = {
+                        logData: oData.results.map(function(item) {
+                            return {
+                                logType: item.Type,
+                                count: parseInt(item.Count)
+                            };
+                        })
+                    };
+
+                    // Tạo JSON Model mới với dữ liệu đã format
+                    var oLogModel = new JSONModel(formattedData);
+                    this.getView().setModel(oLogModel, "logDataModel");
+
+                    // Cập nhật properties cho biểu đồ
+                    var oVizFrame = this.byId("idVizFramePie");
+                    var sChartType = this.getView().getModel("viewModel").getProperty("/pieChartType");
+                    
+                    if (sChartType === "column") {
+                        oVizFrame.setVizProperties({
+                            title: {
+                                text: "Log Type Distribution"
+                            },
+                            plotArea: {
+                                dataLabel: {
+                                    visible: true,
+                                    position: "outside"
+                                }
+                            },
+                            valueAxis: {
+                                title: {
+                                    visible: false
+                                }
+                            },
+                            categoryAxis: {
+                                title: {
+                                    visible: false
+                                }
+                            }
+                        });
+                    } else {
+                        oVizFrame.setVizProperties({
+                            title: {
+                                text: "Log Type"
+                            },
+                            plotArea: {
+                                dataLabel: {
+                                    visible: true,
+                                    position: "outside"
+                                }
+                            }
+                        });
+                    }
+
+                    // Reset busy state sau khi load xong dữ liệu
+                    this.getView().getModel("viewModel").setProperty("/pieBusy", false);
+
+                    // Log để debug
+                    console.log("Log Type Data:", formattedData);
+                }.bind(this),
+                error: function(oError) {
+                    console.error("Error loading Log Type data:", oError);
+                    // Reset busy state trong trường hợp lỗi
+                    this.getView().getModel("viewModel").setProperty("/pieBusy", false);
+                }.bind(this)
             });
         },
     });

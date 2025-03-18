@@ -77,7 +77,7 @@
                         growingThreshold="20">
                         <columns>
                             <Column id="_IDGenColumn">
-                                <Text id="_IDGenText" text="Date/Time"/>
+                                <Text id="_IDGenText0" text="Date/Time"/>
                             </Column>
                             <Column id="_IDGenColumn1">
                                 <Text id="_IDGenText1" text="Event ID"/>
