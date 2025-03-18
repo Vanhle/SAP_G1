@@ -346,5 +346,25 @@
     {
       "code": "AU0",
       "description": "Audit - Test."
+    },
+    {
+      "code": "CUI",
+      "description": "Application started"
+    },
+    {
+      "code": "CUJ",
+      "description": "Failed to start application"
+    },
+    {
+      "code": "DU0",
+      "description": "Invalid SAP GUI data"
+    },
+    {
+      "code": "DU9",
+      "description": "Generic table access call"
+    },
+    {
+      "code": "EUP",
+      "description": "Virtual user"
     }
   ]

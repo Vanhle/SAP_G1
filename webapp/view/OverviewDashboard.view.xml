@@ -35,11 +35,6 @@
                                 id="_IDGenHBox"
                                 class="sapUiSmallMarginBottom"
                             >
-                                <Button
-                                    id="_IDGenButton"
-                                    text="View Details"
-                                    press="onViewDetail"
-                                />
                                 <DateRangeSelection
                                     id="dateRangeSelection"
                                     change="onDateRangeChange"
@@ -221,11 +216,24 @@
                             />
                         </layoutData>
                         <VBox id="_IDGenVBox1">
-                            <HBox id="_IDGenHBox7" class="sapUiSmallMarginBottom">
+                            <HBox
+                                id="_IDGenHBox7"
+                                class="sapUiSmallMarginBottom"
+                            >
+                                <MultiComboBox
+                                    id="logTypeFilter"
+                                    placeholder="Select Log Types"
+                                    selectionChange="onLogTypeFilterChange"
+                                    selectionFinish="onLogTypeFilterFinish"
+                                    class="sapUiTinyMarginEnd"
+                                    width="500px"
+                                    showSecondaryValues="true"
+                                />
                                 <Button
-                                    id="_IDGenButton1"
-                                    text="View Details"
-                                    press="onViewDetail"
+                                    id="resetLogTypeFilter"
+                                    icon="sap-icon://refresh"
+                                    press="onResetLogTypeFilter"
+                                    tooltip="Reset Filter"
                                 />
                             </HBox>
                             <viz:VizFrame
@@ -236,6 +244,7 @@
                                 height="400px"
                                 busy="{viewModel>/pieBusy}"
                                 busyIndicatorDelay="0"
+                                selectData="onVizFrameSelectData"
                             >
                                 <viz:dataset>
                                     <viz.data:FlattenedDataset

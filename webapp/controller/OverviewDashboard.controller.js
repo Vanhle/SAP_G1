@@ -6,8 +6,13 @@ sap.ui.define([
     "sap/viz/ui5/format/ChartFormatter",
     "sap/viz/ui5/api/env/Format",
     "sap/ui/model/BindingMode",
-    "sap/m/DateRangeSelection"
-], function (Controller, ODataModel, JSONModel, BindingMode, FlattenedDataset, ChartFormatter, Format, DateRangeSelection) {
+    "sap/m/DateRangeSelection",
+    "sap/m/Popover",
+    "sap/m/Text",
+    "sap/m/VBox",
+    "sap/m/MultiComboBox",
+    "sap/ui/core/Item"
+], function (Controller, ODataModel, JSONModel, BindingMode, FlattenedDataset, ChartFormatter, Format, DateRangeSelection, Popover, Text, VBox, MultiComboBox, Item) {
     "use strict";
 
     return Controller.extend("overviewdashboard.projectdashboard.controller.OverviewDashboard", {
@@ -36,6 +41,14 @@ sap.ui.define([
 
             // Khởi tạo giá trị mặc định cho DateRangeSelection
             this._initializeDateRange();
+
+            // Thêm LogType Model và khởi tạo filter
+            const oLogTypeModel = new JSONModel();
+            oLogTypeModel.loadData("../model/logType.json", null, false); // Thêm tham số false để load đồng bộ
+            this.getView().setModel(oLogTypeModel, "logTypeModel");
+            
+            // Khởi tạo filter cho Log Type
+            this._initializeLogTypeFilter();
         },
 
         /* =========================================================== */
@@ -82,8 +95,11 @@ sap.ui.define([
          * @public
          */
         onRefreshPress: function () {
+            // Reset DateRangeSelection và Step
             this._resetToDefaultState();
-            this.loadChartData(this.getView().getModel("dataModel"));
+            
+            // Load lại dữ liệu cho biểu đồ Event by Day
+            this._loadEventByDayChart();
         },
 
         /**
@@ -93,6 +109,77 @@ sap.ui.define([
         onViewDetail: function () {
             var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
             oRouter.navTo("EveDetail");
+        },
+
+        /**
+         * Xử lý sự kiện khi click vào bar chart
+         * @param {sap.ui.base.Event} oEvent Event object
+         * @public
+         */
+        onVizFrameSelectData: function(oEvent) {
+            const oPoint = oEvent.getParameter("data")[0];
+            if (!oPoint) {
+                return;
+            }
+
+            // Lấy Type từ điểm được chọn
+            const sSelectedType = oPoint.data["Log Type"];
+            
+            // Tìm description tương ứng từ logType model
+            const aLogTypes = this.getView().getModel("logTypeModel").getData();
+            const oLogType = aLogTypes.find(item => item.code === sSelectedType);
+            
+            // Nếu không tìm thấy description, log ra console
+            if (!oLogType) {
+                console.log("Missing description for Log Type:", sSelectedType);
+                // Hiển thị popover với thông báo không có description
+                this._showPopover({
+                    code: sSelectedType,
+                    description: "No description available"
+                });
+                return;
+            }
+
+            // Hiển thị popover với thông tin đầy đủ
+            this._showPopover({
+                code: sSelectedType,
+                description: oLogType.description
+            });
+        },
+
+        /**
+         * Hiển thị popover với thông tin được cung cấp
+         * @param {Object} oData Dữ liệu để hiển thị (code và description)
+         * @private
+         */
+        _showPopover: function(oData) {
+            // Tạo popover nếu chưa tồn tại
+            if (!this._oPopover) {
+                this._oPopover = new sap.m.Popover({
+                    title: "Log Type Details",
+                    contentWidth: "300px",
+                    content: new sap.m.VBox({
+                        items: [
+                            new sap.m.Text({
+                                text: "Code: {popoverModel>/code}"
+                            }).addStyleClass("sapUiSmallMarginBegin sapUiSmallMarginTop"),
+                            new sap.m.Text({
+                                text: "Description: {popoverModel>/description}"
+                            }).addStyleClass("sapUiSmallMargin")
+                        ]
+                    }),
+                    placement: sap.m.PlacementType.Auto
+                });
+                this.getView().addDependent(this._oPopover);
+            }
+
+            // Set data cho popover
+            const oPopoverModel = new JSONModel(oData);
+            this._oPopover.setModel(oPopoverModel, "popoverModel");
+
+            // Hiển thị popover tại vị trí click
+            const oVizFrame = this.byId("idVizFramePie");
+            this._oPopover.openBy(oVizFrame.getDomRef());
         },
 
         /* =========================================================== */
@@ -113,12 +200,17 @@ sap.ui.define([
         },
 
         /**
-         * Reset về trạng thái mặc định
+         * Reset về trạng thái mặc định cho biểu đồ Event by Day
          * @private
          */
         _resetToDefaultState: function () {
             // Reset DateRangeSelection
-            this._initializeDateRange();
+            var oDateRange = this.byId("dateRangeSelection");
+            var oEndDate = new Date();
+            var oStartDate = new Date();
+            oStartDate.setDate(oStartDate.getDate() - 7);
+            oDateRange.setDateValue(oStartDate);
+            oDateRange.setSecondDateValue(oEndDate);
 
             // Reset Step về 1d
             var oStepSelect = this.byId("stepSelect");
@@ -264,94 +356,25 @@ sap.ui.define([
             return `${year}-${month}-${day}T00:00:00`;
         },
 
+        /**
+         * Load dữ liệu cho tất cả các biểu đồ
+         * @param {sap.ui.model.odata.v2.ODataModel} oDataModel OData model
+         * @public
+         */
         loadChartData: function (oDataModel) {
-            var endDateTime = this.getCurrentDateTime();
-            var startDateTime = this.getStartDateTime();
-
-            this._loadChartDataWithParams(startDateTime, endDateTime, "1d");
-            this._loadLogTypeData(oDataModel);  // Load dữ liệu Log Type từ OData
-
-            // Tạo mô hình JSON và tải dữ liệu cho biểu đồ severity
-            var oSeverityModel = new JSONModel();
-            oSeverityModel.loadData("../model/severityLog.json");
-            this.getView().setModel(oSeverityModel, "severityModel");
+            // Load dữ liệu cho Event by Day chart
+            this._loadEventByDayChart();
+            
+            // Load dữ liệu cho Log Type chart
+            this._loadLogTypeData(oDataModel);
 
             // Tạo mô hình JSON và tải dữ liệu cho biểu đồ thời gian
             var oEventTimeModel = new JSONModel();
             oEventTimeModel.loadData("../model/eventTimeData.json");
             this.getView().setModel(oEventTimeModel, "eventTimeModel");
 
-            // Tạo mô hình JSON cho thời gian hiện tại
-            var oTimeModel = new JSONModel({
-                currentTime: this._getCurrentTime()
-            });
-            this.getView().setModel(oTimeModel, "timeModel");
-
-            // Set title for the column chart
-            var oVizFrameColumn = this.byId("idVizFrameColumn");
-            oVizFrameColumn.setVizProperties({
-                title: {
-                    text: "Events by Day"
-                },
-
-                dataLabel: {
-                    visible: true,
-                    position: "outside"
-                },
-
-                valueAxis: {
-                    title: {
-                        visible: false
-                    }
-                },
-                categoryAxis: {
-                    title: {
-                        visible: false
-                    }
-                }
-            });
-
-            // Set title for the pie chart
-            var oVizFramePie = this.byId("idVizFramePie");
-            oVizFramePie.setVizProperties({
-                title: {
-                    text: "Log Type"
-                },
-                plotArea: {
-                    dataLabel: {
-                        visible: true,
-                        position: "outside"
-                    }
-                }
-            });
-
-            // Set title for the severity chart
-            // var oVizFrameHorizontal = this.byId("idVizFrameHorizontal");
-            // oVizFrameHorizontal.setVizProperties({
-            //     title: {
-            //         text: "Severity Levels"
-            //     },
-            //     plotArea: {
-            //         dataLabel: {
-            //             visible: true,
-            //             position: "outside"
-            //         }
-            //     }
-            // });
-
-            // Set title for the event time chart
-            var oEventTimeVizFrame = this.byId("eventTimeVizFrame");
-            oEventTimeVizFrame.setVizProperties({
-                title: {
-                    text: "Event by Time"
-                },
-                plotArea: {
-                    dataLabel: {
-                        visible: true,
-                        position: "outside"
-                    }
-                }
-            });
+            // Cập nhật properties cho các biểu đồ
+            this._updateChartProperties();
         },
 
         /**
@@ -382,42 +405,389 @@ sap.ui.define([
                     var oLogModel = new JSONModel(formattedData);
                     this.getView().setModel(oLogModel, "logDataModel");
 
+                    // Tính toán kích thước bar dựa trên số lượng items
+                    // const barConfig = this._calculateBarConfig(oData.results.length);
+
                     // Cập nhật properties cho biểu đồ
-                    var oVizFrame = this.byId("idVizFramePie");
-                    oVizFrame.setVizProperties({
-                        title: {
-                            text: "Log Type Distribution"
-                        },
-                        plotArea: {
-                            dataLabel: {
-                                visible: true,
-                                position: "outside"
-                            }
-                        },
-                        valueAxis: {
-                            title: {
-                                visible: false
-                            }
-                        },
-                        categoryAxis: {
-                            title: {
-                                visible: false
-                            }
-                        }
-                    });
+                    // const oVizFrame = this.byId("idVizFramePie");
+                    // oVizFrame.setVizProperties({
+                    //     title: {
+                    //         text: "Log Type Distribution"
+                    //     },
+                    //     plotArea: {
+                    //         dataLabel: {
+                    //             visible: true,
+                    //             position: "outside"
+                    //         },
+                    //         primaryScale: {
+                    //             minValue: 0,
+                    //             maxValue: Math.max(...oData.results.map(item => parseInt(item.Count))) * 1.1
+                    //         },
+                    //         gap: {
+                    //             barSpacing: barConfig.spacing
+                    //         },
+                    //         dataShape: {
+                    //             primaryAxis: ["bar"]
+                    //         }
+                    //     },
+                    //     valueAxis: {
+                    //         title: {
+                    //             visible: false
+                    //         },
+                    //         visible: true
+                    //     },
+                    //     categoryAxis: {
+                    //         title: {
+                    //             visible: false
+                    //         },
+                    //         label: {
+                    //             rotation: 0,
+                    //             style: {
+                    //                 fontSize: "12px"
+                    //             }
+                    //         },
+                    //         visible: true
+                    //     },
+                    //     legend: {
+                    //         visible: false
+                    //     }
+                    // });
 
-                    // Reset busy state sau khi load xong dữ liệu
+                    // Reset busy state
                     this.getView().getModel("viewModel").setProperty("/pieBusy", false);
-
-                    // Log để debug
-                    console.log("Log Type Data:", formattedData);
                 }.bind(this),
                 error: function(oError) {
                     console.error("Error loading Log Type data:", oError);
-                    // Reset busy state trong trường hợp lỗi
                     this.getView().getModel("viewModel").setProperty("/pieBusy", false);
                 }.bind(this)
             });
         },
+
+        /**
+         * Cập nhật properties cho các biểu đồ
+         * @private
+         */
+        _updateChartProperties: function() {
+            // Set title for the column chart
+            var oVizFrameColumn = this.byId("idVizFrameColumn");
+            oVizFrameColumn.setVizProperties({
+                title: {
+                    text: "Events by Day"
+                },
+                    dataLabel: {
+                        visible: true,
+                        position: "outside"
+                },
+                valueAxis: {
+                    title: {
+                        visible: false
+                    }
+                },
+                categoryAxis: {
+                    title: {
+                        visible: false
+                    }
+                }
+            });
+
+            // Set title for the pie chart
+            var oVizFramePie = this.byId("idVizFramePie");
+            oVizFramePie.setVizProperties({
+                title: {
+                    text: "Log Type"
+                },
+                plotArea: {
+                    dataLabel: {
+                        visible: true,
+                        position: "outside"
+                    }
+                }
+            });
+
+            // Set title for the event time chart
+            var oEventTimeVizFrame = this.byId("eventTimeVizFrame");
+            oEventTimeVizFrame.setVizProperties({
+                title: {
+                    text: "Event by Time"
+                },
+                plotArea: {
+                    dataLabel: {
+                        visible: true,
+                        position: "outside"
+                    }
+                }
+            });
+        },
+
+        /**
+         * Load dữ liệu cho biểu đồ Event by Day
+         * @private
+         */
+        _loadEventByDayChart: function() {
+            // Set busy state chỉ cho biểu đồ column
+            this.getView().getModel("viewModel").setProperty("/busy", true);
+            
+            var endDateTime = this.getCurrentDateTime();
+            var startDateTime = this.getStartDateTime();
+            
+            var oDataModel = this.getView().getModel("dataModel");
+            oDataModel.read("/SalogCountSet", {
+                urlParameters: {
+                    "$filter": "StartDateTime eq datetime'" + startDateTime +
+                        "' and EndDateTime eq datetime'" + endDateTime +
+                        "' and Step eq '1d'",
+                    "$format": "json"
+                },
+                success: function(oData) {
+                    // Format dữ liệu
+                    var formattedData = oData.results.map(function (item) {
+                        return {
+                            ...item,
+                            StartDateTime: new Date(item.StartDateTime).toISOString().split('T')[0],
+                            MediumCount: item.MediumCount,
+                            HighCount: item.HighCount
+                        };
+                    });
+
+                    // Cập nhật model
+                    var oModel = new JSONModel({
+                        results: formattedData
+                    });
+                    this.getView().setModel(oModel, "processedDataModel");
+
+                    // Cập nhật thời gian
+                    var oTimeModel = new JSONModel({
+                        currentTime: this._getCurrentTime()
+                    });
+                    this.getView().setModel(oTimeModel, "timeModel");
+
+                    // Reset busy state
+                    this.getView().getModel("viewModel").setProperty("/busy", false);
+                }.bind(this),
+                error: function(oError) {
+                    console.error("Error loading Event by Day data:", oError);
+                    // Reset busy state on error
+                    this.getView().getModel("viewModel").setProperty("/busy", false);
+                }.bind(this)
+            });
+        },
+
+        /**
+         * Khởi tạo filter cho Log Type
+         * @private
+         */
+        _initializeLogTypeFilter: function() {
+            const oMultiComboBox = this.byId("logTypeFilter");
+            const oLogTypeModel = this.getView().getModel("logTypeModel");
+            const aLogTypes = oLogTypeModel.getData() || [];
+            
+            // Thêm option "All"
+            const aItems = [
+                new Item({
+                    key: "ALL",
+                    text: "All"
+                })
+            ];
+
+            // Thêm các log type từ JSON
+            if (Array.isArray(aLogTypes)) {
+                aLogTypes.forEach(logType => {
+                    aItems.push(new Item({
+                        key: logType.code,
+                        text: `${logType.code} - ${logType.description}`
+                    }));
+                });
+            }
+
+            oMultiComboBox.removeAllItems(); // Xóa items cũ nếu có
+            aItems.forEach(item => {
+                oMultiComboBox.addItem(item);  // Sử dụng addItem thay vì addItems
+            });
+            
+            // Mặc định chọn "All"
+            oMultiComboBox.setSelectedKeys(["ALL"]);
+            this._disableOtherSelections(true);
+        },
+
+        /**
+         * Xử lý sự kiện khi thay đổi lựa chọn trong filter
+         * @param {sap.ui.base.Event} oEvent Event object
+         */
+        onLogTypeFilterChange: function(oEvent) {
+            const oMultiComboBox = oEvent.getSource();
+            const aSelectedKeys = oMultiComboBox.getSelectedKeys();
+            
+            // Kiểm tra nếu "All" được chọn
+            if (aSelectedKeys.includes("ALL")) {
+                // Nếu có các lựa chọn khác cùng với "All", chỉ giữ lại "All"
+                if (aSelectedKeys.length > 1) {
+                    oMultiComboBox.setSelectedKeys(["ALL"]);
+                }
+                this._disableOtherSelections(true);
+            } else {
+                this._disableOtherSelections(false);
+            }
+
+            // Cập nhật dữ liệu biểu đồ
+            this._updateLogTypeChart(aSelectedKeys);
+        },
+
+        /**
+         * Xử lý sự kiện khi hoàn thành việc chọn trong filter
+         */
+        onLogTypeFilterFinish: function() {
+            const oMultiComboBox = this.byId("logTypeFilter");
+            const aSelectedKeys = oMultiComboBox.getSelectedKeys();
+            
+            // Nếu không có lựa chọn nào, tự động chọn "All"
+            if (aSelectedKeys.length === 0) {
+                oMultiComboBox.setSelectedKeys(["ALL"]);
+                this._disableOtherSelections(true);
+            }
+        },
+
+        /**
+         * Xử lý sự kiện khi nhấn nút reset filter
+         */
+        onResetLogTypeFilter: function() {
+            const oMultiComboBox = this.byId("logTypeFilter");
+            oMultiComboBox.setSelectedKeys(["ALL"]);
+            this._disableOtherSelections(true);
+            
+            // Load lại toàn bộ dữ liệu
+            this._loadLogTypeData(this.getView().getModel("dataModel"));
+        },
+
+        /**
+         * Vô hiệu hóa các lựa chọn khác khi "All" được chọn
+         * @param {boolean} bDisable True để vô hiệu hóa, false để kích hoạt
+         * @private
+         */
+        _disableOtherSelections: function(bDisable) {
+            const oMultiComboBox = this.byId("logTypeFilter");
+            const aItems = oMultiComboBox.getItems();
+            
+            aItems.forEach(item => {
+                if (item.getKey() !== "ALL") {
+                    item.setEnabled(!bDisable);
+                }
+            });
+        },
+
+        /**
+         * Cập nhật dữ liệu biểu đồ dựa trên các lựa chọn filter
+         * @param {string[]} aSelectedKeys Mảng các key được chọn
+         * @private
+         */
+        _updateLogTypeChart: function(aSelectedKeys) {
+            const oDataModel = this.getView().getModel("dataModel");
+            
+            // Nếu "All" được chọn hoặc không có lựa chọn nào
+            if (aSelectedKeys.includes("ALL") || aSelectedKeys.length === 0) {
+                this._loadLogTypeData(oDataModel);
+                return;
+            }
+
+            // Set busy state
+            this.getView().getModel("viewModel").setProperty("/pieBusy", true);
+
+            oDataModel.read("/SalogTypeCountSet", {
+                urlParameters: {
+                    "$format": "json"
+                },
+                success: function(oData) {
+                    // Lọc dữ liệu theo các type được chọn
+                    const filteredResults = oData.results.filter(item => 
+                        aSelectedKeys.includes(item.Type)
+                    );
+
+                    // Format dữ liệu đã lọc
+                    const formattedData = {
+                        logData: filteredResults.map(item => ({
+                            logType: item.Type,
+                            count: parseInt(item.Count)
+                        }))
+                    };
+
+                    // Cập nhật model
+                    const oLogModel = new JSONModel(formattedData);
+                    this.getView().setModel(oLogModel, "logDataModel");
+
+                    // Tính toán kích thước bar dựa trên số lượng items
+                    // const barConfig = this._calculateBarConfig(filteredResults.length);
+
+                    // Cập nhật properties cho biểu đồ
+                    // const oVizFrame = this.byId("idVizFramePie");
+                    // oVizFrame.setVizProperties({
+                    //     title: {
+                    //         text: "Log Type Distribution"
+                    //     },
+                    //     plotArea: {
+                    //         dataLabel: {
+                    //             visible: true,
+                    //             position: "outside"
+                    //         },
+                    //         primaryScale: {
+                    //             minValue: 0,
+                    //             maxValue: Math.max(...filteredResults.map(item => parseInt(item.Count))) * 1.1
+                    //         },
+                    //         gap: {
+                    //             barSpacing: barConfig.spacing
+                    //         },
+                    //         dataShape: {
+                    //             primaryAxis: ["bar"]
+                    //         }
+                    //     },
+                    //     valueAxis: {
+                    //         title: {
+                    //             visible: false
+                    //         },
+                    //         visible: true
+                    //     },
+                    //     categoryAxis: {
+                    //         title: {
+                    //             visible: false
+                    //         },
+                    //         label: {
+                    //             rotation: 0,
+                    //             style: {
+                    //                 fontSize: "12px"
+                    //             }
+                    //         },
+                    //         visible: true
+                    //     },
+                    //     legend: {
+                    //         visible: false
+                    //     }
+                    // });
+
+                    // Reset busy state
+                    this.getView().getModel("viewModel").setProperty("/pieBusy", false);
+                }.bind(this),
+                error: function(oError) {
+                    console.error("Error loading Log Type data:", oError);
+                    this.getView().getModel("viewModel").setProperty("/pieBusy", false);
+                }.bind(this)
+            });
+        },
+
+        // Thêm hàm mới để tính toán cấu hình cho bar
+        // _calculateBarConfig: function(itemCount) {
+        //     let spacing;
+            
+        //     if (itemCount <= 4) {
+        //         spacing = 0.3; // Khoảng cách lớn cho ít items
+        //     } else if (itemCount <= 8) {
+        //         spacing = 0.2; // Khoảng cách vừa cho số lượng items trung bình
+        //     } else if (itemCount <= 12) {
+        //         spacing = 0.15; // Khoảng cách nhỏ hơn cho nhiều items
+        //     } else {
+        //         spacing = 0.1; // Khoảng cách nhỏ nhất cho rất nhiều items
+        //     }
+
+        //     return {
+        //         spacing: spacing
+        //     };
+        // },
     });
 }); 
