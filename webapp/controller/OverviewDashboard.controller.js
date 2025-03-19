@@ -11,8 +11,9 @@ sap.ui.define([
     "sap/m/Text",
     "sap/m/VBox",
     "sap/m/MultiComboBox",
-    "sap/ui/core/Item"
-], function (Controller, ODataModel, JSONModel, BindingMode, FlattenedDataset, ChartFormatter, Format, DateRangeSelection, Popover, Text, VBox, MultiComboBox, Item) {
+    "sap/ui/core/Item",
+    "../model/LogTypeData"
+], function (Controller, ODataModel, JSONModel, BindingMode, FlattenedDataset, ChartFormatter, Format, DateRangeSelection, Popover, Text, VBox, MultiComboBox, Item, LogTypeData) {
     "use strict";
 
     return Controller.extend("overviewdashboard.projectdashboard.controller.OverviewDashboard", {
@@ -43,8 +44,7 @@ sap.ui.define([
             this._initializeDateRange();
 
             // Thêm LogType Model và khởi tạo filter
-            const oLogTypeModel = new JSONModel();
-            oLogTypeModel.loadData("../model/logType.json", null, false); // Thêm tham số false để load đồng bộ
+            const oLogTypeModel = new JSONModel(LogTypeData.getLogTypeData());
             this.getView().setModel(oLogTypeModel, "logTypeModel");
             
             // Khởi tạo filter cho Log Type
