@@ -56,6 +56,22 @@ sap.ui.define([
         /* =========================================================== */
 
         /**
+         * Format date thành datetime string cho frontend
+         * @param {Date} date Đối tượng Date cần format
+         * @param {boolean} isStartDate True nếu là ngày bắt đầu (00:00:00), false nếu là ngày kết thúc (23:59:59)
+         * @returns {string} Datetime string đã format
+         * @private
+         */
+        _formatDateToDateTime: function (date, isStartDate) {
+            var year = date.getFullYear();
+            var month = String(date.getMonth() + 1).padStart(2, '0');
+            var day = String(date.getDate()).padStart(2, '0');
+            var time = isStartDate ? "00:00:00" : "23:59:59";
+
+            return `${year}-${month}-${day}T${time}`;
+        },
+
+        /**
          * Xử lý sự kiện khi thay đổi khoảng thời gian
          * @param {sap.ui.base.Event} oEvent Event object
          * @public
@@ -66,8 +82,16 @@ sap.ui.define([
             var oEndDate = oDateRange.getSecondDateValue();
 
             if (oStartDate && oEndDate) {
+                // Format ngày tháng cho frontend trước
                 var startDateTime = this._formatDateToDateTime(oStartDate, true);
                 var endDateTime = this._formatDateToDateTime(oEndDate, false);
+
+                console.log("FRONT END - Thời gian truyền đi:", {
+                    startDateTime: startDateTime,
+                    endDateTime: endDateTime
+                });
+
+                // Gọi hàm load dữ liệu với thời gian đã format
                 this._loadChartDataWithParams(startDateTime, endDateTime);
             }
         },
@@ -238,6 +262,28 @@ sap.ui.define([
         },
 
         /**
+         * Điều chỉnh thời gian cho backend
+         * @param {string} dateTimeStr Chuỗi thời gian đầu vào
+         * @returns {string} Chuỗi thời gian đã điều chỉnh
+         * @private
+         */
+        _adjustTimeForBackend: function(dateTimeStr) {
+            var date = new Date(dateTimeStr);
+            // Trừ đi 6 tiếng
+            date.setHours(date.getHours() - 6);
+            
+            // Format lại datetime string mà không dùng toISOString để tránh chuyển đổi UTC
+            var year = date.getFullYear();
+            var month = String(date.getMonth() + 1).padStart(2, '0');
+            var day = String(date.getDate()).padStart(2, '0');
+            var hours = String(date.getHours()).padStart(2, '0');
+            var minutes = String(date.getMinutes()).padStart(2, '0');
+            var seconds = String(date.getSeconds()).padStart(2, '0');
+
+            return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+        },
+
+        /**
          * Load dữ liệu cho biểu đồ với các tham số
          * @param {string} startDateTime Thời gian bắt đầu
          * @param {string} endDateTime Thời gian kết thúc
@@ -251,15 +297,37 @@ sap.ui.define([
             var oDataModel = this.getView().getModel("dataModel");
             step = step || this.byId("stepSelect").getSelectedKey() || "1d";
 
+            // Điều chỉnh thời gian trước khi gửi đến backend
+            var adjustedStartDateTime = this._adjustTimeForBackend(startDateTime);
+            var adjustedEndDateTime = this._adjustTimeForBackend(endDateTime);
+
+            console.log("BACKEND - Thời gian điều chỉnh trước khi gửi:", {
+                adjustedStartDateTime: adjustedStartDateTime,
+                adjustedEndDateTime: adjustedEndDateTime
+            });
+
             oDataModel.read("/SalogCountSet", {
                 urlParameters: {
-                    "$filter": "StartDateTime eq datetime'" + startDateTime +
-                        "' and EndDateTime eq datetime'" + endDateTime +
+                    "$filter": "StartDateTime eq datetime'" + adjustedStartDateTime +
+                        "' and EndDateTime eq datetime'" + adjustedEndDateTime +
                         "' and Step eq '" + step + "'",
                     "$format": "json"
                 },
                 success: function(oData) {
+                    console.log("BACKEND - Dữ liệu nhận về:", {
+                        originalData: oData.results.map(item => ({
+                            StartDateTime: item.StartDateTime
+                        }))
+                    });
+
                     this._onDataLoadSuccess(oData);
+
+                    console.log("BACKEND - Dữ liệu sau khi format:", {
+                        formattedData: this.getView().getModel("processedDataModel").getData().results.map(item => ({
+                            StartDateTime: item.StartDateTime
+                        }))
+                    });
+
                     // Reset busy state
                     this.getView().getModel("viewModel").setProperty("/busy", false);
                 }.bind(this),
@@ -280,7 +348,7 @@ sap.ui.define([
             var formattedData = oData.results.map(function (item) {
                 return {
                     ...item,
-                    StartDateTime: new Date(item.StartDateTime).toISOString().split('T')[0],
+                    StartDateTime: new Date(new Date(item.EndDateTime).getTime()).toISOString().split('T')[0],
                     MediumCount: item.MediumCount,
                     HighCount: item.HighCount
                 };
@@ -299,22 +367,6 @@ sap.ui.define([
          */
         _onDataLoadError: function (oError) {
             console.error("Error fetching data from OData service", oError);
-        },
-
-        /**
-         * Format date thành datetime string
-         * @param {Date} date Đối tượng Date cần format
-         * @param {boolean} isStartDate True nếu là ngày bắt đầu (00:00:00), false nếu là ngày kết thúc (17:00:00)
-         * @returns {string} Datetime string đã format
-         * @private
-         */
-        _formatDateToDateTime: function (date, isStartDate) {
-            var year = date.getFullYear();
-            var month = String(date.getMonth() + 1).padStart(2, '0');
-            var day = String(date.getDate()).padStart(2, '0');
-            var time = isStartDate ? "00:00:00" : "17:00:00";
-
-            return `${year}-${month}-${day}T${time}`;
         },
 
         /**
@@ -340,7 +392,7 @@ sap.ui.define([
             // var minutes = String(currentDate.getMinutes()).padStart(2, '0');
             // var seconds = String(currentDate.getSeconds()).padStart(2, '0');
 
-            return `${year}-${month}-${day}T17:00:00`;
+            return `${year}-${month}-${day}T23:59:00`;
         },
 
         getStartDateTime: function () {
@@ -427,9 +479,9 @@ sap.ui.define([
                 title: {
                     text: "Events by Day"
                 },
-                    dataLabel: {
-                        visible: true,
-                        position: "outside"
+                dataLabel: {
+                    visible: true,
+                    position: "outside"
                 },
                 valueAxis: {
                     title: {
@@ -439,6 +491,15 @@ sap.ui.define([
                 categoryAxis: {
                     title: {
                         visible: false
+                    },
+                    label: {
+                        formatString: 'YYYY-MM-dd'
+                    }
+                },
+                plotArea: {
+                    dataLabel: {
+                        visible: true,
+                        position: "outside"
                     }
                 }
             });
@@ -482,12 +543,14 @@ sap.ui.define([
             
             var endDateTime = this.getCurrentDateTime();
             var startDateTime = this.getStartDateTime();
+            var endDateTimeAdjusted = this._adjustTimeForBackend(endDateTime);
+            var startDateTimeAdjusted = this._adjustTimeForBackend(startDateTime);
             
             var oDataModel = this.getView().getModel("dataModel");
             oDataModel.read("/SalogCountSet", {
                 urlParameters: {
-                    "$filter": "StartDateTime eq datetime'" + startDateTime +
-                        "' and EndDateTime eq datetime'" + endDateTime +
+                    "$filter": "StartDateTime eq datetime'" + startDateTimeAdjusted +
+                        "' and EndDateTime eq datetime'" + endDateTimeAdjusted +
                         "' and Step eq '1d'",
                     "$format": "json"
                 },
@@ -496,7 +559,7 @@ sap.ui.define([
                     var formattedData = oData.results.map(function (item) {
                         return {
                             ...item,
-                            StartDateTime: new Date(item.StartDateTime).toISOString().split('T')[0],
+                            StartDateTime: new Date(new Date(item.EndDateTime).getTime()).toISOString().split('T')[0],
                             MediumCount: item.MediumCount,
                             HighCount: item.HighCount
                         };
