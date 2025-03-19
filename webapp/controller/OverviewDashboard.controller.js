@@ -405,53 +405,6 @@ sap.ui.define([
                     var oLogModel = new JSONModel(formattedData);
                     this.getView().setModel(oLogModel, "logDataModel");
 
-                    // Tính toán kích thước bar dựa trên số lượng items
-                    // const barConfig = this._calculateBarConfig(oData.results.length);
-
-                    // Cập nhật properties cho biểu đồ
-                    // const oVizFrame = this.byId("idVizFramePie");
-                    // oVizFrame.setVizProperties({
-                    //     title: {
-                    //         text: "Log Type Distribution"
-                    //     },
-                    //     plotArea: {
-                    //         dataLabel: {
-                    //             visible: true,
-                    //             position: "outside"
-                    //         },
-                    //         primaryScale: {
-                    //             minValue: 0,
-                    //             maxValue: Math.max(...oData.results.map(item => parseInt(item.Count))) * 1.1
-                    //         },
-                    //         gap: {
-                    //             barSpacing: barConfig.spacing
-                    //         },
-                    //         dataShape: {
-                    //             primaryAxis: ["bar"]
-                    //         }
-                    //     },
-                    //     valueAxis: {
-                    //         title: {
-                    //             visible: false
-                    //         },
-                    //         visible: true
-                    //     },
-                    //     categoryAxis: {
-                    //         title: {
-                    //             visible: false
-                    //         },
-                    //         label: {
-                    //             rotation: 0,
-                    //             style: {
-                    //                 fontSize: "12px"
-                    //             }
-                    //         },
-                    //         visible: true
-                    //     },
-                    //     legend: {
-                    //         visible: false
-                    //     }
-                    // });
 
                     // Reset busy state
                     this.getView().getModel("viewModel").setProperty("/pieBusy", false);
@@ -713,53 +666,7 @@ sap.ui.define([
                     const oLogModel = new JSONModel(formattedData);
                     this.getView().setModel(oLogModel, "logDataModel");
 
-                    // Tính toán kích thước bar dựa trên số lượng items
-                    // const barConfig = this._calculateBarConfig(filteredResults.length);
 
-                    // Cập nhật properties cho biểu đồ
-                    // const oVizFrame = this.byId("idVizFramePie");
-                    // oVizFrame.setVizProperties({
-                    //     title: {
-                    //         text: "Log Type Distribution"
-                    //     },
-                    //     plotArea: {
-                    //         dataLabel: {
-                    //             visible: true,
-                    //             position: "outside"
-                    //         },
-                    //         primaryScale: {
-                    //             minValue: 0,
-                    //             maxValue: Math.max(...filteredResults.map(item => parseInt(item.Count))) * 1.1
-                    //         },
-                    //         gap: {
-                    //             barSpacing: barConfig.spacing
-                    //         },
-                    //         dataShape: {
-                    //             primaryAxis: ["bar"]
-                    //         }
-                    //     },
-                    //     valueAxis: {
-                    //         title: {
-                    //             visible: false
-                    //         },
-                    //         visible: true
-                    //     },
-                    //     categoryAxis: {
-                    //         title: {
-                    //             visible: false
-                    //         },
-                    //         label: {
-                    //             rotation: 0,
-                    //             style: {
-                    //                 fontSize: "12px"
-                    //             }
-                    //         },
-                    //         visible: true
-                    //     },
-                    //     legend: {
-                    //         visible: false
-                    //     }
-                    // });
 
                     // Reset busy state
                     this.getView().getModel("viewModel").setProperty("/pieBusy", false);
@@ -771,23 +678,6 @@ sap.ui.define([
             });
         },
 
-        // Thêm hàm mới để tính toán cấu hình cho bar
-        // _calculateBarConfig: function(itemCount) {
-        //     let spacing;
-            
-        //     if (itemCount <= 4) {
-        //         spacing = 0.3; // Khoảng cách lớn cho ít items
-        //     } else if (itemCount <= 8) {
-        //         spacing = 0.2; // Khoảng cách vừa cho số lượng items trung bình
-        //     } else if (itemCount <= 12) {
-        //         spacing = 0.15; // Khoảng cách nhỏ hơn cho nhiều items
-        //     } else {
-        //         spacing = 0.1; // Khoảng cách nhỏ nhất cho rất nhiều items
-        //     }
 
-        //     return {
-        //         spacing: spacing
-        //     };
-        // },
     });
 }); 
